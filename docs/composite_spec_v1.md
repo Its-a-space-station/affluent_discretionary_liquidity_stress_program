@@ -1,7 +1,8 @@
 # ADLS Composite Stress Measure — Specification v1.1 (PROPOSED)
 
-Status: **APPROVED — Composite Spec v1.1, owner-approved 2026-07-19 (all six
-§13 decision points, as written).** Lineage: v1 drafted a priori, attacked by
+Status: **APPROVED — Composite Spec v1.2** (v1.1 approved 2026-07-19, all six
+§13 decision points; §14 validation-hardening delta approved same day —
+its five items are binding amendments to §9/§3). Lineage: v1 drafted a priori, attacked by
 an independent checker the same day (4 blockers, 8 majors — disposition in
 §12), rebuilt as v1.1, then approved. Labels remain `research_only`. Defines
 the deterministic composite over approved Basket v1
@@ -245,3 +246,28 @@ identical frozen sequences and bands.
    (descriptive until out-of-sample episodes accrue) and the coincident-
    monitor failure clause.
 6. Nominal spending with real-PCE cross-check (vs deflating inputs).
+
+## 14. v1.2 delta — validation hardening (owner-approved 2026-07-19)
+
+From the time-series papers review (`docs/reference_library_timeseries.md`);
+**approved 2026-07-19 — binding amendments to the §9 protocol and §3
+documentation; §1–13 unchanged:**
+
+1. **Baseline floor**: the primary claim must beat pre-registered simple
+   baselines — no-change/seasonal-naive (scored via MASE), AR, and VAR — in
+   addition to the permuted null. Documented motivation: linear/VAR methods
+   beat deep SOTA on economic/trend data (TFB); naive baselines beat every
+   transformer on financial series (DLinear).
+2. **Per-regime, macro-averaged reporting**: results reported per regime
+   (recession/expansion; turning-point vs trend months) with equal-weight
+   macro-averages alongside pooled numbers — turning points are rare but are
+   the use case (QUITOBENCH prevalence-bias finding).
+3. **Cross-series embargo**: permutation blocks embargo correlated periods
+   across ALL basket series jointly (shared business-cycle driver = indirect
+   leakage), not merely within-series lags.
+4. **Score every point**: no dropped/incomplete test windows; the frozen
+   §2 pipeline is the only pipeline (forecloses batch-dependent scoring).
+5. **Input-availability taxonomy** (TFT vocabulary, applies to current
+   deterministic design): every basket input is classified
+   known-future / observed-with-lag / static in the basket documentation,
+   making the no-lookahead property auditable at the ragged edge.

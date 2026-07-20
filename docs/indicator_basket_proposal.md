@@ -66,6 +66,17 @@ detail paid), Mastercard SpendingPulse (topline free). Rejected outright:
 monthly jewelry retail (`MRTSSM44831USS` dead since Feb 2021), Amex (no public
 tracker).
 
+## Input-availability taxonomy (spec §14.5, applied 2026-07-19)
+
+Per TFT vocabulary (known-future / observed-with-lag / static): **all nine
+core inputs are `observed-with-lag`** — each becomes known only at its
+publication release, with the lags documented in the core table above. The
+basket currently contains no known-future inputs (calendar/seasonal features
+would be the only candidates, and none are members) and no static inputs.
+Consequence: at any assembly date the ragged edge is governed entirely by the
+release calendar — no input may be treated as available for a reference period
+before its release date.
+
 ## Independence clusters (for composite weighting)
 
 Per the concurrency-discount doctrine (library map problem 3), members of one

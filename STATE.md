@@ -29,6 +29,12 @@ exist or are authorized yet.
   (read-only public macro/credit series incl. FRED/ALFRED vintages, retail &
   luxury sales releases, deposit-flow data — adapters still gated), deterministic
   composite criteria, weekly report cadence.
+- 2026-07-19 — Owner approved **Spec v1.2 delta** (§14): validation baseline
+  floor (seasonal-naive/AR/VAR), per-regime macro-averaged reporting,
+  cross-series permutation embargo, score-every-point, and the TFT
+  input-availability taxonomy (applied to the basket doc — all nine inputs
+  classified `observed-with-lag`). Source: TS-papers review
+  (docs/reference_library_timeseries.md).
 - 2026-07-19 — Owner approved **Composite Spec v1.1** (all six §13 decision
   points as written): PSAVERT excluded / Strain confirming-only, equal weights
   across four independence families, frozen as-published canonical history,

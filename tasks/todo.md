@@ -43,6 +43,16 @@
       carry full back-history for 10-year z-windows (ALFRED, read-only).
 - [!] Phase 2 (implementation) authorization — owner gate: read-only
       FRED/ALFRED adapter + deterministic composite code + §9 validation run.
+- [x] Spec §14 v1.2 delta **approved 2026-07-19** (baseline floor, per-regime
+      reporting, cross-series embargo, score-every-point, input-availability
+      taxonomy — taxonomy applied to basket doc same day).
+- [ ] Optional (playbook-side, owner call): enrich the playbook's
+      `before_universal_forecaster_use` checklist with gate conditions C1–C6
+      from the TS review (contamination datasheet, vintage-vs-revised eval,
+      post-cutoff skill, coverage calibration, monthly-context adequacy,
+      determinism bounds).
+- [ ] Housekeeping (owner call): move the misfiled AIRS-Bench paper from
+      "Papers on Time Series Forecasting" to "Papers on Coding".
 - [ ] Maker/checker split defined: composite computation (maker) vs independent
       recomputation + range/sanity checks (checker).
 - [ ] Canonical labels only in belief cards; indicator levels stay data fields.
