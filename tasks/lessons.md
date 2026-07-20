@@ -38,6 +38,25 @@ decision time — the macro-data form of lookahead bias.
 vintages), and every series' revision behavior is documented before it enters
 the composite.
 
+## Project-specific lessons
+
+### 2026-07-19 — Series signings must be walked through named episodes, not intuited
+
+**Context:** Composite spec v1 signed PSAVERT as "falling = stress" and revolving
+credit as "accelerating = stress." Checker walked the arithmetic through April
+2020 and 2022: the composite read the anchor stress episode as ~Normal and the
+affluent boom as ~High.
+**Lesson:** Macro series are regime-conditional; several invert at stress onsets
+(precautionary saving spikes, credit contracts, delinquency falls under
+forbearance). Worse, accounting identities (S = Y − C) can wire two basket
+members to mechanically cancel in exactly the target episodes.
+**Apply:** Every signing must be walked through at least 2008, 2020, and 2022
+before a spec leaves the maker; identity-coupled series pairs don't belong in
+the same additive composite.
+
 ## Repeated mistakes to avoid
 
-- (none recorded yet)
+- Signing a series from intuition without named-episode walkthroughs.
+- Pre-registering a validation step against data whose vintage limitations the
+  basket doc already recorded (UMich has no vintage archive; the protocol cited
+  it anyway).

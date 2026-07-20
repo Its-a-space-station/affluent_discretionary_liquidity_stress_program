@@ -34,8 +34,15 @@
 - [~] Weekly as-of self-archive (owner-approved 2026-07-19; manual — see
       `data_archive/README.md`). First pull done: ICI secured; FINRA/UMich/
       EGI/JPMC/BofA are manual steps for the first full weekly pass.
-- [ ] Specify the deterministic composite stress measure (weights, thresholds,
-      bands) — deterministic, reproducible, vintage-data-only.
+- [x] Specify the deterministic composite stress measure — **v1.1 APPROVED
+      2026-07-19** (`docs/composite_spec_v1.md`; all six decision points as
+      written; checker-reviewed and rebuilt before approval).
+- [ ] Resolve `validation_pending`: Visa SMI methodology note (confirm
+      momentum-around-100 construction → level-vs-100 transform).
+- [ ] Resolve `validation_pending`: confirm 2013-era RSFSDP/RSFHFS vintages
+      carry full back-history for 10-year z-windows (ALFRED, read-only).
+- [!] Phase 2 (implementation) authorization — owner gate: read-only
+      FRED/ALFRED adapter + deterministic composite code + §9 validation run.
 - [ ] Maker/checker split defined: composite computation (maker) vs independent
       recomputation + range/sanity checks (checker).
 - [ ] Canonical labels only in belief cards; indicator levels stay data fields.

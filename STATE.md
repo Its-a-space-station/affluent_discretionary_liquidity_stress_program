@@ -29,6 +29,13 @@ exist or are authorized yet.
   (read-only public macro/credit series incl. FRED/ALFRED vintages, retail &
   luxury sales releases, deposit-flow data — adapters still gated), deterministic
   composite criteria, weekly report cadence.
+- 2026-07-19 — Owner approved **Composite Spec v1.1** (all six §13 decision
+  points as written): PSAVERT excluded / Strain confirming-only, equal weights
+  across four independence families, frozen as-published canonical history,
+  Tier-A-only bands with burn-in and dwell rules, pre-registered single-claim
+  validation with binding power statement, nominal inputs with real-PCE
+  cross-check. Spec was independently checker-reviewed and rebuilt before
+  approval (disposition in spec §12).
 - 2026-07-19 — Owner approved **Indicator Basket v1** (all four decision points
   of `docs/indicator_basket_proposal.md`): 9-series vintage-validatable core,
   affluent overlay as report-context-only, weekly manual self-archive routine
@@ -73,10 +80,11 @@ Loops produce findings and reports only — never actions.
 
 ## Next recommended action
 
-- Specify the deterministic composite stress measure on Basket v1: per-series
-  transformations (growth rates / z-scores), independence-cluster weighting,
-  thresholds and bands — all set **a priori, before any outcome data is
-  examined** (selection discipline in `docs/indicator_basket_proposal.md`).
-  First spec decision: two-tier composite (long-history 8-series + Visa-
-  augmented from 2024-05) vs single short-window design — VISASMIDSA vintages
-  verified to start 2024-05-09.
+- The definition layer is complete (basket + composite spec both approved).
+  Executing spec §9 validation requires computation on ALFRED vintages — i.e.,
+  leaving documentation-only Bootstrap. Owner decision needed to authorize
+  **Phase 2 (implementation)**: read-only FRED/ALFRED adapter (FRED_API_KEY
+  via git-ignored env, per §10 approval gate), deterministic composite
+  computation, and the §9 validation run. Before or alongside: resolve the two
+  `validation_pending` sub-items (Visa SMI methodology note; 2013 retail
+  vintage back-history depth) — both checkable read-only without code.
