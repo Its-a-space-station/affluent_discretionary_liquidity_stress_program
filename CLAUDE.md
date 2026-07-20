@@ -100,15 +100,15 @@ Explicit, in-context human approval is required before:
   schema enums**; extending `object_type`/`project` in the playbook schemas
   requires a playbook-side change with owner approval (tracked in STATE blockers).
 - **Project slug:** `adls`.
-- **Providers (read-only, PROPOSED — confirm before any adapter work):** public
-  macro/credit series (e.g., FRED/ALFRED vintages), retail & luxury sales
-  releases, deposit-flow data. Respect terms & rate limits; no scraping that
-  evades provider terms.
-- **Criteria summary (PROPOSED):** deterministic composite stress indicators
-  with predefined thresholds and bands; every component series documented with
-  provenance, release lag, and revision behavior.
-- **Report cadence (PROPOSED):** weekly research report; ad-hoc
-  `needs_human_review` escalations on regime-break signals.
+- **Providers (read-only; owner-approved 2026-07-19 — building any adapter
+  still requires separate approval per §9):** public macro/credit series
+  (e.g., FRED/ALFRED vintages), retail & luxury sales releases, deposit-flow
+  data. Respect terms & rate limits; no scraping that evades provider terms.
+- **Criteria summary (owner-approved 2026-07-19):** deterministic composite
+  stress indicators with predefined thresholds and bands; every component
+  series documented with provenance, release lag, and revision behavior.
+- **Report cadence (owner-approved 2026-07-19):** weekly research report;
+  ad-hoc `needs_human_review` escalations on regime-break signals.
 - **Project-specific safety notes:** ADLS is an advisory signal layer only.
   Its outputs carry research disclaimers and are never consumed as automated
   triggers by any trading-adjacent system.

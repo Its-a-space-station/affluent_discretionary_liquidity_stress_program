@@ -9,8 +9,8 @@
       from the playbook templates. (2026-07-19)
 - [x] Copy governing policies locally: safety, label, verification,
       maker_checker, report. (2026-07-19)
-- [ ] Owner confirms PROPOSED fields in `CLAUDE.md` §10 (providers, criteria
-      summary, report cadence).
+- [x] Owner confirms PROPOSED fields in `CLAUDE.md` §10 (providers, criteria
+      summary, report cadence). (Approved 2026-07-19.)
 - [x] Documentation-only first commit (explicit paths; owner approved 2026-07-19;
       3 commits: governance / scaffold / library map, pushed to origin main).
 

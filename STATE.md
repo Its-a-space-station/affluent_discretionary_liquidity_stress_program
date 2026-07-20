@@ -25,6 +25,10 @@ exist or are authorized yet.
   research-only advisory layer for the wider research family.
 - 2026-07-19 — Bootstrap scaffold adopted from playbook templates; governing
   policy docs copied locally (safety, label, verification, maker_checker, report).
+- 2026-07-19 — Owner approved the CLAUDE.md §10 operating fields: providers
+  (read-only public macro/credit series incl. FRED/ALFRED vintages, retail &
+  luxury sales releases, deposit-flow data — adapters still gated), deterministic
+  composite criteria, weekly report cadence.
 
 ## Safety rules (in force)
 
@@ -65,6 +69,8 @@ Loops produce findings and reports only — never actions.
 
 ## Next recommended action
 
-- Owner reviews bootstrap + confirms the PROPOSED fields in CLAUDE.md §10
-  (providers, criteria, cadence), then authorizes the documentation-only first
-  commit with explicit paths. (Requires user authorization.)
+- Indicator basket selection: owner picks the candidate affluent-discretionary
+  liquidity-stress series; each gets provenance / release-lag / revision-behavior
+  documentation before entering the composite. (Requires owner input on the
+  candidate list; see docs/reference_library_adls.md problems 2–3 for the
+  validation and selection discipline.)
