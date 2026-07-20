@@ -1,0 +1,44 @@
+# Secrets and credentials — NEVER commit these.
+.env
+.env.*
+*.env
+secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+credentials*.json
+service-account*.json
+*token*
+*secret*
+*.credentials
+
+# Local config that may contain endpoints, account ids, or keys
+config.local.*
+*.local.json
+.claude/settings.local.json
+
+# Provider / broker session and cache artifacts (future)
+.cache/
+*.session
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+*~
+
+# Python (in case future projects are colocated; the playbook itself has no code)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+
+# Data dumps and outputs — keep research artifacts out of version control
+data/
+outputs/
+reports/*.local.*
