@@ -29,6 +29,11 @@ exist or are authorized yet.
   (read-only public macro/credit series incl. FRED/ALFRED vintages, retail &
   luxury sales releases, deposit-flow data — adapters still gated), deterministic
   composite criteria, weekly report cadence.
+- 2026-07-19 — Owner approved **Indicator Basket v1** (all four decision points
+  of `docs/indicator_basket_proposal.md`): 9-series vintage-validatable core,
+  affluent overlay as report-context-only, weekly manual self-archive routine
+  (first pull executed; ICI secured), DFA conflict resolved (FRED live for
+  percentile headline series; liquid-asset detail via federalreserve.gov CSV).
 
 ## Safety rules (in force)
 
@@ -59,7 +64,6 @@ Loops produce findings and reports only — never actions.
 - Canonical schema enums (`object_type`, `project`) do not include
   `macro_indicator` / `adls` — playbook-side extension needs owner approval
   before schema adoption can be checked off.
-- Indicator basket not yet selected — owner input needed on candidate series.
 
 ## Last checkpoint
 
@@ -69,8 +73,10 @@ Loops produce findings and reports only — never actions.
 
 ## Next recommended action
 
-- Indicator basket selection: owner picks the candidate affluent-discretionary
-  liquidity-stress series; each gets provenance / release-lag / revision-behavior
-  documentation before entering the composite. (Requires owner input on the
-  candidate list; see docs/reference_library_adls.md problems 2–3 for the
-  validation and selection discipline.)
+- Specify the deterministic composite stress measure on Basket v1: per-series
+  transformations (growth rates / z-scores), independence-cluster weighting,
+  thresholds and bands — all set **a priori, before any outcome data is
+  examined** (selection discipline in `docs/indicator_basket_proposal.md`).
+  First spec decision: two-tier composite (long-history 8-series + Visa-
+  augmented from 2024-05) vs single short-window design — VISASMIDSA vintages
+  verified to start 2024-05-09.

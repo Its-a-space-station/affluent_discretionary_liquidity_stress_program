@@ -23,9 +23,17 @@
 
 ## Indicator definition (MVP)
 
-- [ ] Owner selects candidate indicator basket (affluent discretionary
-      liquidity-stress components) with provenance, release lag, and revision
-      behavior documented per series.
+- [x] Owner selects candidate indicator basket — **Basket v1 approved
+      2026-07-19** (`docs/indicator_basket_proposal.md`: 9-series core +
+      report-only affluent overlay; maker draft + two independent checker
+      agents; DFA conflict resolved by direct FRED check).
+- [x] Verify `VISASMIDSA` ALFRED vintage depth — vintages since 2024-05-09
+      (verified on ALFRED 2026-07-19); Visa copyright, citation required.
+      Consequence for composite spec: choose two-tier composite (long-history
+      8-series + Visa-augmented from 2024-05) vs single short-window design.
+- [~] Weekly as-of self-archive (owner-approved 2026-07-19; manual — see
+      `data_archive/README.md`). First pull done: ICI secured; FINRA/UMich/
+      EGI/JPMC/BofA are manual steps for the first full weekly pass.
 - [ ] Specify the deterministic composite stress measure (weights, thresholds,
       bands) — deterministic, reproducible, vintage-data-only.
 - [ ] Maker/checker split defined: composite computation (maker) vs independent

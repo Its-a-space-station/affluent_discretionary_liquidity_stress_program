@@ -42,3 +42,8 @@ venv/
 data/
 outputs/
 reports/*.local.*
+
+# As-of self-archive of no-vintage sources (approved 2026-07-19) — local only,
+# never committed; the archive README documenting the routine IS committed.
+data_archive/*
+!data_archive/README.md
