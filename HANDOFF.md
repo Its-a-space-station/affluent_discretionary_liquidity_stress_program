@@ -16,8 +16,9 @@ reference docs, and ADLS went from an empty GitHub repo to: checklist-
 compliant bootstrap → owner-approved Indicator Basket v1 → checker-hardened
 Composite Spec v1.2 → **Phase 2 authorized** → **Slice 1 built, live-verified,
 and pushed** (`537c1d0`) → **Slice 1 repaired and pushed** (`ef69c8c`) →
-**Slice 2 built and verified locally on 2026-07-21**. Everything below exists
-to let you continue from Slice 3 without re-deriving any of it.
+**Slice 2 built and pushed** (`7927586`) → **Slice 3 built, independently
+reviewed, and verified locally on 2026-07-21**. Everything below exists to let
+you continue from Slice 4 without re-deriving any of it.
 
 ## What was decided (all owner-approved, in order)
 
@@ -58,7 +59,7 @@ to let you continue from Slice 3 without re-deriving any of it.
    sum of chained-dollar levels. Baseline exact specs must be pinned there
    BEFORE the first real-data validation run (item 5, still placeholder).
 
-## Where the code stands (Slices 1-2 of 7 complete)
+## Where the code stands (Slices 1-3 of 7 complete)
 
 - `src/adls/`: config (only getenv site, never echoes), registry (Basket v1 as
   data, including WRMFNS +2-day canonical shift), contracts,
@@ -74,7 +75,15 @@ to let you continue from Slice 3 without re-deriving any of it.
   and per-series coverage. `inputs/loader.py` returns one PIT value shape for
   ALFRED and archive inputs, converts coverage problems to validation errors,
   applies final-only canonical UMich, and hides future episode close dates.
-- 36/36 unit + posture tests, ruff, and mypy are green (`.venv`, Python 3.14)
+- `engine/` is the Slice 3 maker: one complete PIT snapshot produces pooled
+  retail/liquidity stress, Visa and UMich scores, a separate Strain overlay,
+  Tier A/B aggregation, and explicit staleness/dropout flags. Z windows exclude
+  the current observation and use population sigma with ±3 caps. Canonical and
+  provisional archive modes are distinct; late retrieval is rechecked; raw or
+  reversibly transformed UMich levels never enter canonical bytes. Serialization
+  is six-place half-even canonical JSON, pinned at SHA-256
+  `9a455e9d13e77d405db37fad671b680dd93014d627164cfc6bb5d9ca96ab1438`.
+- 57/57 unit + posture tests, ruff, and mypy are green (`.venv`, Python 3.14)
   (env-token confinement, requests confined to alfred/, forbidden-vocabulary
   scan with sort_order/ORDER BY exemptions, no scheduler artifacts).
 - **Live-verified**: RSFSDP (166 vintages/2,512 spans), RSFHFS (166/2,607),
@@ -94,15 +103,15 @@ to let you continue from Slice 3 without re-deriving any of it.
 - `FRED_API_KEY` is in `.env` (git-ignored, owner-entered via hidden prompt;
   **never read or log it** — source it: `set -a; source .env; set +a`).
 
-## Immediate next step: Slice 3 — engine core
+## Immediate next step: Slice 4 — calendar, frozen store, and bands
 
-Per the approved plan, implement one deterministic assembly under spec §3-§5
-and §7 using the Slice 2 PIT values. Start fail-before with: synthetic 2020-04
-sign tests (spending stress, Strain anti-stress, PSAVERT absent); a REVOLSL
-units-break fixture proving growth never crosses vintages; trailing z minimum,
-population sigma, and ±3 cap; complete-family staleness/dropout and composite
-renormalization; run-twice byte identity with a pinned golden SHA. Keep maker
-logic under `engine/`; Slice 5 remains the independent checker.
+Per the approved plan, implement spec §2 and §6: Friday/market-holiday assembly
+dates, M+2/15th monthly finalization, append-only `canonical/frozen_sequence.jsonl`,
+Tier-A percentile bands, 36-month burn-in, and two-month entry/exit dwell. Start
+fail-before with weekend/holiday finalization edges, rewrite refusal, frozen
+values immune to later revisions, and the dwell state machine. Weekly outputs
+remain explicitly provisional and never drive canonical bands. Slice 5 remains
+the independent recomputation checker.
 
 ## Deferred owner decisions (raise at the flagged moment, not before)
 
@@ -163,5 +172,5 @@ logic under `engine/`; Slice 5 remains the independent checker.
 
 You should be able to: read this + STATE + todo, `cd` here, source the local
 git-ignored environment without printing it, run `.venv/bin/pytest -q` (expect
-36 green), and start Slice 3 under `src/adls/engine/` with fail-before fixtures
+57 green), and start Slice 4 with calendar/frozen-store fail-before fixtures
 without re-opening any question settled above.

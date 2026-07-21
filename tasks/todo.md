@@ -65,8 +65,14 @@
       UMich, and both provider coverage boundaries are regression-tested.
       Provider-neutral outputs cap episode visibility at assembly D so eventual
       revision dates cannot leak backward. 36/36 tests + ruff + mypy green.
-- [ ] Slice 3 — engine core (§3-§5, §7): named-episode sign tests, units-break
-      fixture, byte-identity golden.
+- [x] Slice 3 — engine core (§3-§5, §7). Complete 2026-07-21: one PIT snapshot
+      feeds pooled/sign-correct transforms, complete weekly months, trailing
+      population z-scores, release-anchored staleness, required-member dropout,
+      Tier A/B renormalization, and separate Strain. Canonical/provisional
+      archive modes are explicit; internal UMich levels are redacted. The
+      REVOLSL cache-vintage boundary, named April 2020 signs, all staleness
+      thresholds, run-twice bytes, fixture generator, and pinned SHA are tested.
+      Independent review findings repaired; 57/57 tests + ruff + mypy green.
 - [ ] Slice 4 — calendar, canonicalization, frozen store, bands (§2, §6).
 - [ ] Slice 5 — independent checker (maker≠checker in code; seeded-defect tests).
 - [ ] Slice 6 — validation harness (§9+§14); then owner decision: seed frozen

@@ -1,7 +1,7 @@
 # STATE.md — ADLS (Affluent Discretionary Liquidity Stress Program)
 
 *Last updated: 2026-07-21.* **New session? Read `HANDOFF.md` first** — the
-full narrative of how this repo got here and the Slice 3 starting point.
+full narrative of how this repo got here and the Slice 4 starting point.
 
 ## Phase
 
@@ -89,6 +89,16 @@ Loops produce findings and reports only — never actions.
 
 ## Last checkpoint
 
+- 2026-07-21 — Phase 2 Slice 3 complete: the pure-stdlib maker engine computes
+  one PIT assembly with pooled/sign-correct transforms, complete weekly-month
+  aggregation, trailing population z-scores excluding the current observation,
+  release-anchored staleness, required-member dropout, Tier A/B renormalization,
+  and a separate Strain overlay. Canonical/provisional UMich modes are explicit;
+  late-retrieval availability is rechecked; licensed transformed levels are
+  redacted at serialization. Canonical JSON is six-place half-even, run-twice
+  byte-identical, and pinned at SHA-256 `9a455e9d13e77d405db37fad671b680dd93014d627164cfc6bb5d9ca96ab1438`.
+  Independent review found and drove repairs for preliminary-stage leakage and
+  incomplete weekly grids. Verification: 57/57 tests, ruff, and mypy.
 - 2026-07-21 — Phase 2 Slice 2 complete: normalized archive CSVs are validated
   without raising on data defects; release stages, late retrieval, canonical
   sorting, duplicate/conflict detection, gap warnings, bounded per-series
@@ -113,8 +123,8 @@ Loops produce findings and reports only — never actions.
 
 ## Next recommended action
 
-- Execute Phase 2 Slice 3: deterministic single-assembly engine core for
-  transforms, family pooling/signing, trailing z-scores, staleness abstention,
-  and family/composite aggregation. Start with named-episode sign fixtures,
-  the REVOLSL units-break boundary, z abstention/capping, and byte-identical
-  serialization tests before implementation.
+- Execute Phase 2 Slice 4: assembly calendar, monthly canonicalization,
+  append-only frozen store, and Tier-A bands under spec §2 and §6. Start
+  fail-before with holiday-Friday finalization edges, the 36-month burn-in,
+  two-month entry/exit dwell, rewrite refusal, and proof that later revisions
+  cannot alter an already frozen month.

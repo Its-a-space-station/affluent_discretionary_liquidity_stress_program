@@ -40,6 +40,18 @@ the composite.
 
 ## Project-specific lessons
 
+### 2026-07-21 — A transformed licensed level can still be the raw level
+
+**Context:** Slice 3 initially serialized UMich's inverted level alongside its
+z-score. Negation changes the sign but is exactly reversible, so the supposedly
+derived field still disclosed an internal-use source value.
+**Lesson:** Licensing boundaries apply to reversible transforms, not only to
+verbatim inputs. An explicit canonical/provisional mode is also necessary when
+the same input layer can return preliminary or final releases.
+**Apply:** Redact reversible internal-license transforms at the publication
+boundary, retain only non-reversible scores, and pin both redaction and assembly
+mode in canonical-byte tests.
+
 ### 2026-07-21 — Historical span endpoints are future knowledge
 
 **Context:** Building the uniform point-in-time loader in Slice 2. A historical
