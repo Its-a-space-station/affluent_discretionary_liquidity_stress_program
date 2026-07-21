@@ -4,9 +4,12 @@
 
 ## Phase
 
-**Bootstrap (documentation-only).** Repo scaffolded from the Decision Systems
-Playbook templates; purpose confirmed by owner; no code, providers, or loops
-exist or are authorized yet.
+**Phase 2 — Implementation (authorized 2026-07-20 via approved plan).** The
+bootstrap scope guard is lifted for exactly this scope: read-only FRED/ALFRED
+adapter with durable vintage cache, deterministic composite engine (spec
+§1–§7), §9/§14 validation harness, weekly report generator — built in seven
+verified slices. Still gated: schedulers/launchd, any execution path,
+forecasting models, schema adoption, external publication.
 
 ## Current MVP scope
 
@@ -80,17 +83,20 @@ Loops produce findings and reports only — never actions.
 
 ## Last checkpoint
 
+- 2026-07-20 — Phase 2 Slice 1 complete: ALFRED adapter + span-based vintage
+  cache built and live-verified (17/17 tests, ruff, mypy; three series
+  backfilled; 2013 vintage depth resolved — full history to 1992, no fallback
+  needed). Timeout-retry bug found by live fire and fixed with regression
+  tests. Next: Slice 2 (uniform input layer).
 - 2026-07-19 — Documentation-only bootstrap committed and pushed with owner
   approval: 3 commits (inherited governance / operating scaffold / library map),
   explicit paths only.
 
 ## Next recommended action
 
-- The definition layer is complete (basket + composite spec both approved).
-  Executing spec §9 validation requires computation on ALFRED vintages — i.e.,
-  leaving documentation-only Bootstrap. Owner decision needed to authorize
-  **Phase 2 (implementation)**: read-only FRED/ALFRED adapter (FRED_API_KEY
-  via git-ignored env, per §10 approval gate), deterministic composite
-  computation, and the §9 validation run. Before or alongside: resolve the two
-  `validation_pending` sub-items (Visa SMI methodology note; 2013 retail
-  vintage back-history depth) — both checkable read-only without code.
+- Execute Phase 2 Slice 1 (skeleton, config, ALFRED client, vintage cache)
+  per the approved plan (~/.claude/plans/imperative-gathering-hummingbird.md,
+  mirrored in tasks/todo.md). Visa SMI methodology resolved during planning
+  (0–200 diffusion index centered at 100 → §3.2 transform locked); the 2013
+  vintage-depth question is Slice 1's live-smoke exit criterion. Spec
+  convention pins live in canonical/spec_errata.md (approved with the plan).

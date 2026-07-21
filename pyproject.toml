@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "adls"
+version = "0.1.0"
+description = "ADLS - research-only affluent discretionary liquidity stress composite (informs a human; never acts)"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.31",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.4",
+    "mypy>=1.10",
+    "types-requests",
+]
+
+[project.scripts]
+adls = "adls.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/adls"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 99
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+mypy_path = "src"
+packages = ["adls"]
+warn_unused_ignores = true
+disallow_untyped_defs = true

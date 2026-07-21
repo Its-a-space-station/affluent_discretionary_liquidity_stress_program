@@ -41,8 +41,28 @@
       momentum-around-100 construction → level-vs-100 transform).
 - [ ] Resolve `validation_pending`: confirm 2013-era RSFSDP/RSFHFS vintages
       carry full back-history for 10-year z-windows (ALFRED, read-only).
-- [!] Phase 2 (implementation) authorization — owner gate: read-only
-      FRED/ALFRED adapter + deterministic composite code + §9 validation run.
+- [x] Phase 2 (implementation) authorization — **granted 2026-07-20** via
+      approved plan (scope-guard lift for adapter/engine/validation/report;
+      schedulers, execution paths, forecasting, schemas, publication stay gated).
+
+## Phase 2 slices (approved plan; each slice: fail-before/pass-after, ask before commit)
+
+- [x] Slice 1 — skeleton, config, ALFRED client, SQLite vintage cache.
+      Complete 2026-07-20: 17/17 tests + ruff + mypy green; live smoke
+      backfilled RSFSDP/RSFHFS/VISASMIDSA (166/166/27 vintages); vintage-depth
+      question RESOLVED (2013 vintages carry history to 1992 — errata item 6);
+      live fire caught + fixed a real bug (network timeouts bypassed the retry
+      loop; now retried with backoff, regression-tested).
+- [ ] Slice 2 — uniform input layer (archive CSV contract + PIT loader).
+- [ ] Slice 3 — engine core (§3-§5, §7): named-episode sign tests, units-break
+      fixture, byte-identity golden.
+- [ ] Slice 4 — calendar, canonicalization, frozen store, bands (§2, §6).
+- [ ] Slice 5 — independent checker (maker≠checker in code; seeded-defect tests).
+- [ ] Slice 6 — validation harness (§9+§14); then owner decision: seed frozen
+      store from checker-Verified reconstruction?
+- [ ] Slice 7 — weekly report + launch-condition audit.
+- [x] Visa SMI methodology confirmed (0-200 diffusion index, neutral 100) —
+      §3.2 (100 − level) transform locked. (Resolved in planning, 2026-07-20.)
 - [x] Spec §14 v1.2 delta **approved 2026-07-19** (baseline floor, per-regime
       reporting, cross-series embargo, score-every-point, input-availability
       taxonomy — taxonomy applied to basket doc same day).
