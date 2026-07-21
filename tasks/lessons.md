@@ -40,6 +40,17 @@ the composite.
 
 ## Project-specific lessons
 
+### 2026-07-21 — Historical span endpoints are future knowledge
+
+**Context:** Building the uniform point-in-time loader in Slice 2. A historical
+preliminary value can be selected correctly at assembly D while its cached
+episode still carries the later date on which a final value replaced it.
+**Lesson:** Returning that eventual close date at D leaks a future release even
+when the selected value itself is point-in-time correct.
+**Apply:** Use full span endpoints internally for selection, but cap all exposed
+`available_through` metadata at the requested assembly date. Test the metadata
+boundary as well as the selected value.
+
 ### 2026-07-19 — Series signings must be walked through named episodes, not intuited
 
 **Context:** Composite spec v1 signed PSAVERT as "falling = stress" and revolving

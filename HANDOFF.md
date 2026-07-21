@@ -15,9 +15,9 @@ agent papers, 26 time-series papers) were agent-reviewed into doctrine-mapped
 reference docs, and ADLS went from an empty GitHub repo to: checklist-
 compliant bootstrap → owner-approved Indicator Basket v1 → checker-hardened
 Composite Spec v1.2 → **Phase 2 authorized** → **Slice 1 built, live-verified,
-and pushed** (`537c1d0`) → **Slice 1 repaired locally on 2026-07-21** after a
-whole-repo review. Everything below exists to let you continue from Slice 2
-without re-deriving any of it.
+and pushed** (`537c1d0`) → **Slice 1 repaired and pushed** (`ef69c8c`) →
+**Slice 2 built and verified locally on 2026-07-21**. Everything below exists
+to let you continue from Slice 3 without re-deriving any of it.
 
 ## What was decided (all owner-approved, in order)
 
@@ -58,7 +58,7 @@ without re-deriving any of it.
    sum of chained-dollar levels. Baseline exact specs must be pinned there
    BEFORE the first real-data validation run (item 5, still placeholder).
 
-## Where the code stands (Slice 1 of 7, complete and repaired)
+## Where the code stands (Slices 1-2 of 7 complete)
 
 - `src/adls/`: config (only getenv site, never echoes), registry (Basket v1 as
   data, including WRMFNS +2-day canonical shift), contracts,
@@ -68,7 +68,13 @@ without re-deriving any of it.
   with declared, non-regressing coverage), `cli.py` (`adls fetch`). Fetches now
   cap observations to the latest vintage returned by the preceding vintage-date
   call and audit the two endpoints separately.
-- 24/24 unit + posture tests, ruff, and mypy are green (`.venv`, Python 3.14)
+- `inputs/archive.py` validates normalized CSVs with collected errors/warnings,
+  canonical UTC/date/stage/provenance rules, deterministic sequence and
+  duplicate/conflict checks, frequency-gap warnings, non-overlapping episodes,
+  and per-series coverage. `inputs/loader.py` returns one PIT value shape for
+  ALFRED and archive inputs, converts coverage problems to validation errors,
+  applies final-only canonical UMich, and hides future episode close dates.
+- 36/36 unit + posture tests, ruff, and mypy are green (`.venv`, Python 3.14)
   (env-token confinement, requests confined to alfred/, forbidden-vocabulary
   scan with sort_order/ORDER BY exemptions, no scheduler artifacts).
 - **Live-verified**: RSFSDP (166 vintages/2,512 spans), RSFHFS (166/2,607),
@@ -88,31 +94,15 @@ without re-deriving any of it.
 - `FRED_API_KEY` is in `.env` (git-ignored, owner-entered via hidden prompt;
   **never read or log it** — source it: `set -a; source .env; set +a`).
 
-## Immediate next step: Slice 2 — uniform input layer
+## Immediate next step: Slice 3 — engine core
 
-Per the approved plan (full text in the plan file; slices also in todo):
-- `src/adls/inputs/archive.py`: normalized-CSV contract for manual
-  `data_archive/` sources — columns `series_id, observation_date, value_text,
-  release_date, release_stage, source_file, retrieved_at`; ValidationResult
-  (collect errors/warnings, NEVER raise on data issues — Trading_consultant
-  data_contract.py shape, already in `contracts.py`). Stage values are
-  `preliminary|final|revision|not_applicable`.
-- `src/adls/inputs/loader.py`: uniform PIT view — for assembly date D, per
-  series: ALFRED spans only when D is within declared cache coverage; archive
-  rows only when `max(release_date, date(retrieved_at)) ≤ D` and D is within
-  archive coverage. Archive episodes are non-overlapping; a later stage closes
-  the previous episode the day before. Canonical UMich selects finals only;
-  prelims are provisional-nowcast-only.
-- Tests: contract fixtures (missing column/invalid stage/unsorted/duplicate/gap
-  → collected, not raised); PIT boundaries (vintage == D inclusive; D+1
-  provably unselectable); late retrieval cannot appear early; prelim closes
-  when final arrives; final-only canonical selection; both providers reject D
-  beyond coverage; normalized fixture loads end-to-end.
-- Also: update `data_archive/README.md` with the normalize-to-CSV step for
-  the weekly routine.
-Then Slices 3–7: engine core → calendar/canonicalization/frozen store/bands →
-independent checker → validation harness → weekly report. Slice details,
-tests, and exit criteria are all in the plan file.
+Per the approved plan, implement one deterministic assembly under spec §3-§5
+and §7 using the Slice 2 PIT values. Start fail-before with: synthetic 2020-04
+sign tests (spending stress, Strain anti-stress, PSAVERT absent); a REVOLSL
+units-break fixture proving growth never crosses vintages; trailing z minimum,
+population sigma, and ±3 cap; complete-family staleness/dropout and composite
+renormalization; run-twice byte identity with a pinned golden SHA. Keep maker
+logic under `engine/`; Slice 5 remains the independent checker.
 
 ## Deferred owner decisions (raise at the flagged moment, not before)
 
@@ -172,6 +162,6 @@ tests, and exit criteria are all in the plan file.
 ## The acid test
 
 You should be able to: read this + STATE + todo, `cd` here, source the local
-git-ignored environment without printing it, run `.venv/bin/pytest -q`, and
-start writing `src/adls/inputs/archive.py` against the repaired contract —
+git-ignored environment without printing it, run `.venv/bin/pytest -q` (expect
+36 green), and start Slice 3 under `src/adls/engine/` with fail-before fixtures
 without re-opening any question settled above.

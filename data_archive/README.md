@@ -40,28 +40,45 @@ Suggested slot: Friday afternoon (after the H.8 release lands).
 FRED/ALFRED core-basket series need **no** archiving — ALFRED is the vintage
 archive (that's why the core basket was restricted to vintage-bearing series).
 
-## Normalized CSV contract (Slice 2 input)
+## Normalized CSV contract (implemented in Slice 2)
 
 Raw evidence is never edited. A normalization step writes git-ignored CSVs
 under `data/normalized_archive/` with these required columns:
 
 `series_id, observation_date, value_text, release_date, release_stage, source_file, retrieved_at`
 
+- `load_archive_csv()` consumes one cumulative canonical history CSV, which a
+  normalization job may rebuild from any number of immutable raw snapshots.
+  The file may contain multiple archive-backed series.
 - `retrieved_at` is the actual UTC ISO-8601 retrieval timestamp; it is not
   reconstructed from a nominal release calendar.
 - `release_stage` is one of `preliminary`, `final`, `revision`, or
   `not_applicable`.
+- `source_file` is a safe relative provenance path; absolute paths and parent
+  traversal are invalid. Release dates cannot precede observation dates or
+  follow retrieval dates for these `observed_with_lag` inputs.
 - Effective availability is `max(release_date, UTC date(retrieved_at))`. A late
   download is never treated as knowable before ADLS actually archived it.
+- Canonical row sequence is `(series_id, observation_date,
+  effective_available_date, release_stage, retrieved_at, release_date,
+  source_file)`. Unsorted or duplicate rows are errors.
 - For each `(series_id, observation_date)`, value episodes are ordered by
   effective availability. A later episode closes the prior one on the previous
   calendar day. Conflicting values on the same effective date are validation
   errors, never silently resolved.
 - Each series' latest successfully processed retrieval date is its declared
   archive coverage. The final known episode is bounded by that coverage date; a
-  loader must refuse an assembly date beyond that series' coverage.
+  loader must refuse an assembly date beyond that series' coverage. When a new
+  snapshot contains no changed value, at least one provenance-bearing row for
+  that series must still retain the newer `retrieved_at` and `source_file` to
+  advance coverage.
 - Canonical UMich input uses `final` rows only. A `preliminary` row may appear
   only in a clearly labeled provisional nowcast.
+- Historical episode close dates are used internally for selection but are
+  never exposed past the requested assembly date; doing so would leak a future
+  revision. `load_archive_csv()` and `PointInTimeLoader.history_at()` implement
+  these rules. The committed fixture is synthetic and contains no licensed
+  provider values.
 
 ## First pull — 2026-07-19
 

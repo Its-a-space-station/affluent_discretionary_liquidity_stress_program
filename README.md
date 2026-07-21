@@ -15,7 +15,8 @@ family and governed by its safety policy (local copies in `docs/`).
 - Governing policies: `docs/`
 - Which book answers which question: `docs/reference_library_adls.md`
 
-Current phase: **Phase 2 implementation.** Slice 1 (read-only ALFRED adapter and
-durable vintage cache) is complete and repaired; Slice 2 is the uniform
-point-in-time input layer. Schedulers, execution paths, forecasting models,
-schema adoption, and external publication remain gated.
+Current phase: **Phase 2 implementation.** Slices 1-2 are complete: read-only
+ALFRED with durable vintage cache, normalized self-archive validation, and a
+uniform point-in-time input layer. Slice 3 is the deterministic engine core.
+Schedulers, execution paths, forecasting models, schema adoption, and external
+publication remain gated.

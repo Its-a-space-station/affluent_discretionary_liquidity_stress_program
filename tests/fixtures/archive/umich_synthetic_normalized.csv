@@ -1,0 +1,5 @@
+series_id,observation_date,value_text,release_date,release_stage,source_file,retrieved_at
+UMICH_SCA_T2N_TOP,2026-04-01,10.0,2026-05-15,preliminary,synthetic_fixture.xls,2026-05-20T14:00:00Z
+UMICH_SCA_T2N_TOP,2026-04-01,11.0,2026-05-30,final,synthetic_fixture.xls,2026-05-30T14:00:00Z
+UMICH_SCA_T2N_TOP,2026-05-01,20.0,2026-06-15,preliminary,synthetic_fixture.xls,2026-06-15T14:00:00Z
+UMICH_SCA_T2N_TOP,2026-05-01,21.0,2026-06-30,final,synthetic_fixture.xls,2026-06-30T14:00:00Z

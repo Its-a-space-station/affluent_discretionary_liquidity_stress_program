@@ -58,11 +58,13 @@
       required-member staleness, archive availability/stages, and non-additive
       validation outcome; enforce coherent ALFRED cutoff, truthful endpoint
       audit telemetry, and non-regressing cache coverage. (2026-07-21)
-- [ ] Slice 2 — uniform input layer (archive CSV contract + PIT loader).
-      Required tests: missing columns/invalid stages/unsorted rows/duplicates
-      collect errors; late retrieval is unavailable before `retrieved_at`;
-      preliminary spans close when final arrives; canonical UMich selects final
-      only; archive and ALFRED lookups refuse dates beyond declared coverage.
+- [x] Slice 2 — uniform input layer (archive CSV contract + PIT loader).
+      Complete 2026-07-21: data defects collect without raising; UTC/date,
+      stages, canonical sort, duplicates/conflicts, gaps, safe provenance paths,
+      late retrieval, bounded coverage, prelim/final, final-only canonical
+      UMich, and both provider coverage boundaries are regression-tested.
+      Provider-neutral outputs cap episode visibility at assembly D so eventual
+      revision dates cannot leak backward. 36/36 tests + ruff + mypy green.
 - [ ] Slice 3 — engine core (§3-§5, §7): named-episode sign tests, units-break
       fixture, byte-identity golden.
 - [ ] Slice 4 — calendar, canonicalization, frozen store, bands (§2, §6).

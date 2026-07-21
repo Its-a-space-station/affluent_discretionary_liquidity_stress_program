@@ -24,6 +24,9 @@ class ObservationSpan:
     value_text: str  # vendor text verbatim ('.' preserved); parsed at compute time
     source: str  # 'alfred' | 'archive'
     source_file: str | None = None
+    release_date: str | None = None
+    release_stage: str | None = None
+    retrieved_at: str | None = None
 
 
 @dataclass
@@ -38,6 +41,38 @@ class ValidationResult:
 
     def warn(self, msg: str) -> None:
         self.warnings.append(msg)
+
+    def extend(self, other: ValidationResult) -> None:
+        if other.errors:
+            self.ok = False
+            self.errors.extend(other.errors)
+        self.warnings.extend(other.warnings)
+
+
+@dataclass(frozen=True)
+class PointInTimeValue:
+    """One provider-neutral observation knowable at an assembly date.
+
+    `available_through` is capped at that assembly date so a later revision's
+    eventual span boundary cannot leak backward.
+    """
+
+    series_id: str
+    observation_date: str
+    value_text: str
+    release_date: str
+    available_from: str
+    available_through: str
+    source: str
+    source_file: str | None = None
+    release_stage: str | None = None
+    retrieved_at: str | None = None
+
+
+@dataclass(frozen=True)
+class PointInTimeResult:
+    values: tuple[PointInTimeValue, ...]
+    validation: ValidationResult
 
 
 @dataclass(frozen=True)

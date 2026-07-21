@@ -1,7 +1,7 @@
 # STATE.md — ADLS (Affluent Discretionary Liquidity Stress Program)
 
 *Last updated: 2026-07-21.* **New session? Read `HANDOFF.md` first** — the
-full narrative of how this repo got here and the Slice 2 starting point.
+full narrative of how this repo got here and the Slice 3 starting point.
 
 ## Phase
 
@@ -35,8 +35,8 @@ forecasting models, schema adoption, external publication.
   policy docs copied locally (safety, label, verification, maker_checker, report).
 - 2026-07-19 — Owner approved the CLAUDE.md §10 operating fields: providers
   (read-only public macro/credit series incl. FRED/ALFRED vintages, retail &
-  luxury sales releases, deposit-flow data — adapters still gated), deterministic
-  composite criteria, weekly report cadence.
+  luxury sales releases, deposit-flow data), deterministic composite criteria,
+  and weekly report cadence. Phase 2 later authorized the scoped implementation.
 - 2026-07-19 — Owner approved **Spec v1.2 delta** (§14): validation baseline
   floor (seasonal-naive/AR/VAR), per-regime macro-averaged reporting,
   cross-series permutation embargo, score-every-point, and the TFT
@@ -53,8 +53,9 @@ forecasting models, schema adoption, external publication.
 - 2026-07-19 — Owner approved **Indicator Basket v1** (all four decision points
   of `docs/indicator_basket_proposal.md`): 9-series vintage-validatable core,
   affluent overlay as report-context-only, weekly manual self-archive routine
-  (first pull executed; ICI provenance repaired 2026-07-21), DFA conflict resolved (FRED live for
-  percentile headline series; liquid-asset detail via federalreserve.gov CSV).
+  (first pull executed; ICI provenance repaired 2026-07-21), DFA conflict
+  resolved (FRED live for percentile headline series; liquid-asset detail via
+  federalreserve.gov CSV).
 
 ## Safety rules (in force)
 
@@ -88,6 +89,12 @@ Loops produce findings and reports only — never actions.
 
 ## Last checkpoint
 
+- 2026-07-21 — Phase 2 Slice 2 complete: normalized archive CSVs are validated
+  without raising on data defects; release stages, late retrieval, canonical
+  sorting, duplicate/conflict detection, gap warnings, bounded per-series
+  coverage, and final-only canonical UMich are enforced. A provider-neutral PIT
+  loader now covers ALFRED and archives and hides future episode close dates.
+  Verification: 36/36 tests, ruff, mypy, SQLite integrity, zero cache overlaps.
 - 2026-07-21 — Slice 1 repair complete: current-year ICI provenance captured
   without overwriting prior evidence; deterministic spec gaps pinned; ALFRED
   observation fetches capped to the vintage-date snapshot; endpoint audit rows
@@ -106,8 +113,8 @@ Loops produce findings and reports only — never actions.
 
 ## Next recommended action
 
-- Execute Phase 2 Slice 2: normalized archive CSV validation plus a uniform PIT
-  loader. Use `max(release_date, retrieval_date)`, explicit release stages,
-  bounded archive coverage, final-only canonical UMich, and the ALFRED coverage
-  guard. The binding conventions are in `canonical/spec_errata.md`; the test
-  checklist is in `tasks/todo.md` and the narrative contract is in `HANDOFF.md`.
+- Execute Phase 2 Slice 3: deterministic single-assembly engine core for
+  transforms, family pooling/signing, trailing z-scores, staleness abstention,
+  and family/composite aggregation. Start with named-episode sign fixtures,
+  the REVOLSL units-break boundary, z abstention/capping, and byte-identical
+  serialization tests before implementation.

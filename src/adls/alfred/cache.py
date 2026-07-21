@@ -187,6 +187,13 @@ class VintageCache:
         self, series_id: str, vintage: str
     ) -> list[tuple[str, str]]:
         """[(observation_date, value_text)] as knowable at `vintage`."""
+        spans = self.series_spans_at_vintage(series_id, vintage)
+        return [(span.observation_date, span.value_text) for span in spans]
+
+    def series_spans_at_vintage(
+        self, series_id: str, vintage: str
+    ) -> list[ObservationSpan]:
+        """Provider spans active at `vintage`, with coverage enforced."""
         complete_through = self.complete_through_vintage(series_id)
         if complete_through is None:
             raise VintageCoverageError(
@@ -200,13 +207,27 @@ class VintageCache:
         with self._connect() as conn:
             rows = conn.execute(
                 """
-                SELECT observation_date, value_text FROM observation_spans
+                SELECT series_id, observation_date, realtime_start, realtime_end,
+                       value_text, source, source_file
+                FROM observation_spans
                 WHERE series_id = ? AND realtime_start <= ? AND realtime_end >= ?
                 ORDER BY observation_date
                 """,
                 (series_id, vintage, vintage),
             ).fetchall()
-        return [(r["observation_date"], r["value_text"]) for r in rows]
+        return [
+            ObservationSpan(
+                series_id=row["series_id"],
+                observation_date=row["observation_date"],
+                realtime_start=row["realtime_start"],
+                realtime_end=row["realtime_end"],
+                value_text=row["value_text"],
+                source=row["source"],
+                source_file=row["source_file"],
+                release_date=row["realtime_start"],
+            )
+            for row in rows
+        ]
 
     def first_fetched_at(self, series_id: str, observation_date: str,
                          realtime_start: str) -> str | None:
