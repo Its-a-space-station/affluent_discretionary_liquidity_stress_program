@@ -1,6 +1,7 @@
 # STATE.md — ADLS (Affluent Discretionary Liquidity Stress Program)
 
-*Last updated: 2026-07-19.*
+*Last updated: 2026-07-20.* **New session? Read `HANDOFF.md` first** — the
+full narrative of how this repo got here and the Slice 2 starting point.
 
 ## Phase
 
