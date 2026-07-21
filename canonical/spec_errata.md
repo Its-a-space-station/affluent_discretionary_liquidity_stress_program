@@ -1,8 +1,9 @@
 # Spec Errata — owner-approved convention pins
 
-Approved 2026-07-20 with the Phase 2 plan. These pin conventions the spec
-(v1.2) leaves open; without them "byte-identical sequences" is undefined.
-Each entry is binding on both the engine (maker) and the checker.
+Items 1-6 were approved 2026-07-20 with the Phase 2 plan. Items 7-9 were
+approved as repair pins on 2026-07-21. These close conventions the spec (v1.2)
+left open or stated incorrectly; each entry is binding on both the engine
+(maker) and the checker.
 
 1. **z-score window**: the trailing window EXCLUDES the current observation
    (consistent with §2's percentile convention); standard deviation is the
@@ -17,9 +18,12 @@ Each entry is binding on both the engine (maker) and the checker.
    rule). Rationale: WRMFNS weekly data is published in monthly batches with
    the H.6; §7's own principle ("normal release gap + one full missed cycle")
    applied to its actual release cadence gives ~45 days. H.8 remains 21 days.
-4. **Weekly→monthly aggregation**: arithmetic mean of Wednesday-stamped
-   observations belonging to a complete month (confirms spec §1 "averaged";
-   month completeness per §2's last-Wednesday rule).
+4. **Weekly→monthly aggregation and canonical weekday**: arithmetic mean of
+   canonical-Wednesday observations belonging to a complete month. H.8
+   (`DPSACBW027SBOG`) is natively Wednesday-stamped and receives no shift.
+   `WRMFNS` is natively Monday-stamped and shifts **+2 calendar days** to its
+   corresponding canonical Wednesday before month assignment. A month is
+   complete only when the selected release covers its last canonical Wednesday.
 5. **Baseline exact specs** (to be filled IN THIS FILE before the first
    real-data validation run, per §14.1 — placeholders intentionally not
    pre-filled with numbers chosen after seeing data):
@@ -34,3 +38,25 @@ Each entry is binding on both the engine (maker) and the checker.
    needed. VISASMIDSA first vintage confirmed 2024-05-09 with 124
    observations back to 2014-01-01 (z-window adequate; as-of run short per
    spec §6 two-tier design).
+7. **Required-member staleness**: a pooled family is defined by all of its
+   registered members. If any required member is missing or stale, the whole
+   family abstains; it never degrades to a single-member substitute with changed
+   economics or weight. The composite renormalizes only across complete
+   families, and still abstains when at least two leading families are absent.
+8. **Self-archive effective availability and stages**: normalized rows carry
+   `release_stage` (`preliminary`, `final`, `revision`, or `not_applicable`) and
+   `retrieved_at`. Effective availability is
+   `max(release_date, UTC date(retrieved_at))`; late retrieval never creates
+   synthetic hindsight. Episodes for one observation are non-overlapping, with
+   each later episode closing the prior one on the previous day. The current
+   episode is bounded by declared archive coverage. Canonical UMich uses finals
+   only; preliminary rows are provisional-nowcast-only.
+9. **Validation outcome (non-additive chained dollars)**: never add
+   `DRCARX1Q020SBEA` and `DFSARX1Q020SBEA` levels. For each positive component
+   independently, fit an OLS line to log levels over the eight completed
+   quarters ending at `t-1`, extrapolate it to `t`, and compute
+   `gap_c,t = 100 * (exp(log(x_c,t) - predicted_log_c,t) - 1)`. The synthetic
+   outcome is the equal-weight mean of the two component gaps. Both components
+   are required. The primary event is a synthetic gap at or below -2.0% in
+   either of the next two quarters. This is a research outcome, not a BEA
+   aggregate or contribution measure.

@@ -1,12 +1,14 @@
-# ADLS Composite Stress Measure — Specification v1.1 (PROPOSED)
+# ADLS Composite Stress Measure — Specification v1.2
 
 Status: **APPROVED — Composite Spec v1.2** (v1.1 approved 2026-07-19, all six
 §13 decision points; §14 validation-hardening delta approved same day —
 its five items are binding amendments to §9/§3). Lineage: v1 drafted a priori, attacked by
 an independent checker the same day (4 blockers, 8 majors — disposition in
-§12), rebuilt as v1.1, then approved. Labels remain `research_only`. Defines
+§12), rebuilt as v1.1, then approved. The 2026-07-21 repair pins in
+`canonical/spec_errata.md` are binding. Labels remain `research_only`. Defines
 the deterministic composite over approved Basket v1
-(`docs/indicator_basket_proposal.md`). Documentation only; no code authorized.
+(`docs/indicator_basket_proposal.md`). Phase 2 implementation is authorized
+within the scope recorded in `STATE.md`.
 
 ## 0. System frame (Powell 5-element form)
 
@@ -55,11 +57,16 @@ the deterministic composite over approved Basket v1
 - **Point-in-time rule (binding)**: an assembly at date D uses only vintages
   released ≤ D; growth rates are computed within a single vintage's history
   (never across vintages — REVOLSL units break, benchmark revisions).
-- **Weekly-input month assignment**: H.8/WRMFNS weeks belong to the month
-  containing their Wednesday stamp; a month is complete at the first release
-  covering its last Wednesday. Partial months never enter the composite.
+- **Weekly-input month assignment**: H.8 is already Wednesday-stamped. WRMFNS
+  is Monday-stamped and shifts +2 calendar days to the corresponding canonical
+  Wednesday. Both belong to the month containing that canonical Wednesday; a
+  month is complete at the first selected release covering its last canonical
+  Wednesday. Partial months never enter the composite.
 - **UMich prelim/final**: canonical values use finals only; prelims may inform
   the provisional nowcast; the self-archive captures both.
+- **Self-archive availability**: a row is knowable on the later of its stated
+  release date and actual retrieval date. Archive-backed PIT reads are refused
+  beyond declared archive coverage; late retrieval never backfills knowledge.
 - **Percentile convention**: empirical percentiles with linear interpolation;
   the current value is excluded from its own reference set.
 - **DRCCLACBS carry**: last released value carried forward until replaced or
@@ -74,14 +81,13 @@ All signings below were walked through 2008, 2020, and 2022 (lesson of
 (ΔRSFSDP₁₂ₘ + ΔRSFHFS₁₂ₘ) / (RSFSDP + RSFHFS)ₜ₋₁₂ — scale-free, weights
 implicit. Sign: decelerating discretionary spend = stress. Nominal by choice
 (a priori): deflation would add a CPI dependency; instead the inflation-regime
-caveat is documented (§8) and the quarterly real-PCE pair is wired into
-validation as the cross-check (§9).
+   caveat is documented (§8) and the quarterly real-PCE components are wired
+   independently into the synthetic validation outcome (§9).
 
 **3.2 Visa SMI-Discretionary.** Transform: **(100 − level)**, z-scored — SMI
-is already a momentum-style index around a neutral 100, so differencing it
-again would be a double difference (checker M6). `validation_pending`: confirm
-against Visa's methodology note before composite lock; if SMI turns out to be
-a level index, switch to 12-month change with written rationale.
+is already a momentum-style diffusion index around a neutral 100, so
+differencing it again would be a double difference (checker M6). Methodology
+confirmed 2026-07-20; the transform is locked.
 
 **3.3 Household liquidity pool.** Pooled growth:
 (ΔH.8₁₂ₘ + ΔWRMFNS₁₂ₘ) / (H.8 + WRMFNS)ₜ₋₁₂ — scale-free (fixes dollar-change
@@ -144,10 +150,11 @@ double-counting. Confirming overlay is reported separately, never averaged in.
 Linear decay is deleted (unearned complexity — checker M7). An input
 **abstains** (with a mandatory report flag) when the time since its latest
 *release* exceeds normal gap + one full missed cycle: monthly inputs 40 days;
-weekly pool components 21 days; DRCCLACBS 110 days. Family/composite handling:
-a family with all members abstaining drops out and the leading composite
-renormalizes over remaining families **with a prominent flag**; if ≥ 2 of the
-four families abstain, the composite itself abstains for that assembly.
+H.8 21 days; WRMFNS 45 days; DRCCLACBS 110 days. A pooled family requires every
+registered member: if any member is stale or missing, the whole family abstains
+instead of silently changing definition. The leading composite renormalizes
+over complete remaining families **with a prominent flag**; if ≥ 2 of the four
+families abstain, the composite itself abstains for that assembly.
 
 ## 8. Known construction behavior (pre-registered before validation)
 
@@ -161,7 +168,8 @@ Stated now so validation cannot quietly "discover" them:
    direction), which validation should confirm on vintages.
 2. **2021-22 nominal masking / disinflation false-stress**: nominal spending
    growth overstated real activity in 2021-22 and will mechanically decelerate
-   under disinflation; the real-PCE cross-check exists for this.
+   under disinflation; the two-component synthetic real-PCE outcome exists for
+   this cross-check.
 3. **QT / SVB liquidity false-positives** (§3.3).
 4. **Vibecession sentiment false-positive** (§3.4).
 5. **Revision-event band moves**: annual Census benchmarks and NIPA summer
@@ -175,16 +183,22 @@ Stated now so validation cannot quietly "discover" them:
   documented assumption** — SCA finals are treated as unrevised (historically
   true; logged as verification debt) with a reconstructed release calendar;
   there is no vintage archive (checker B2). Visa joins 2024-05→.
-  `validation_pending` (m2): confirm the 2013-era retail vintages contain
-  full back-history for the 10-year z-windows.
+  The 2013-era retail vintage-depth check is resolved in errata item 6.
 - **One primary claim** (the only confirmatory test): *a confirmed Watch-or-
   higher band on the frozen Tier A leading composite precedes declines of
-  ≥ 2% below 8-quarter trend in combined real discretionary-services PCE
-  (DRCARX1Q020SBEA + DFSARX1Q020SBEA), within 1-2 quarters.* Method: circular
-  block permutation (block = 12 months), embargo = 12 months around tested
-  episodes, ROPE = lead-rate improvement of ≥ 15 percentage points over the
-  permuted distribution's median. Trial count logged in a verification-debt
-  entry.
+  at least 2% below trend in the synthetic discretionary-services outcome,
+  within 1-2 quarters.* For each of `DRCARX1Q020SBEA` and
+  `DFSARX1Q020SBEA`, independently fit a log-linear OLS trend to the eight
+  completed quarters ending at `t-1`, extrapolate to `t`, and calculate the
+  percentage gap. The outcome is the equal-weight mean of those two gaps; both
+  are required. Component chained-dollar levels are never added, because BEA
+  states that they are non-additive outside the reference year. This is a
+  synthetic research outcome, not an official BEA aggregate or contribution
+  measure. Method: circular block permutation (block = 12 months), embargo =
+  12 months around tested episodes, ROPE = lead-rate improvement of ≥ 15
+  percentage points over the permuted distribution's median. Trial count is
+  logged in a verification-debt entry. See errata item 9 and BEA's
+  [chained-dollar guidance](https://www.bea.gov/help/glossary/chained-dollar-estimates).
 - **Power statement (binding honesty)**: the window contains ≤ 4 candidate
   episodes; results are **descriptive** regardless of p-values, and the label
   "leading" may only be claimed after out-of-sample episodes accrue. If the
@@ -225,8 +239,8 @@ in §2; pool weights made scale-free) · **B4** Tier B band pathology (bands on
 Tier A only, burn-in, dwell rules) · **M1-M8** adopted as specified (family
 weighting with variance disclosure, pool formula, nominal-with-cross-check,
 one primary claim + block permutation + power statement, Visa transform
-corrected to level-vs-100 pending methodology confirmation, staleness
-simplified to binary, calibration test added). Acceptance test for the final
+corrected to level-vs-100 and later methodology-confirmed, staleness simplified
+to binary, calibration test added). Acceptance test for the final
 spec: two independent implementers reconstructing 2013-2026 Tier A must get
 identical frozen sequences and bands.
 
@@ -245,13 +259,15 @@ identical frozen sequences and bands.
 5. Validation as pre-registered in §9 — including the binding power statement
    (descriptive until out-of-sample episodes accrue) and the coincident-
    monitor failure clause.
-6. Nominal spending with real-PCE cross-check (vs deflating inputs).
+6. Nominal spending with the independently detrended, two-component real-PCE
+   cross-check (vs deflating inputs; non-additivity repair pinned in errata 9).
 
 ## 14. v1.2 delta — validation hardening (owner-approved 2026-07-19)
 
 From the time-series papers review (`docs/reference_library_timeseries.md`);
 **approved 2026-07-19 — binding amendments to the §9 protocol and §3
-documentation; §1–13 unchanged:**
+documentation; later repair pins in `canonical/spec_errata.md` control where
+they amend the original text:**
 
 1. **Baseline floor**: the primary claim must beat pre-registered simple
    baselines — no-change/seasonal-naive (scored via MASE), AR, and VAR — in

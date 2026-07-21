@@ -65,11 +65,13 @@ A reviewer must be able to retrace the path from raw observation to finding.
   debt**, not dropped — so coverage gaps stay visible.
 - A `Conflicting` finding is escalated to a human, never auto-resolved.
 
-## 7. Verification in the bootstrap phase
+## 7. Verification in Phase 2
 
-There is no code yet, so "verification" currently means: documents are
-internally consistent, cross-links resolve, and policies do not contradict one
-another. As schemas and code arrive, this policy extends to data and tests.
+Verification now covers code, point-in-time data behavior, deterministic
+artifacts, and documentation consistency. Every implementation slice requires
+focused regression tests plus the repository posture, lint, and type checks;
+real-data smoke checks must record coverage and provenance without exposing
+credentials.
 
 ## 8. Playbook v2 additions
 

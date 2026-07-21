@@ -15,5 +15,7 @@ family and governed by its safety policy (local copies in `docs/`).
 - Governing policies: `docs/`
 - Which book answers which question: `docs/reference_library_adls.md`
 
-Current phase: **Bootstrap (documentation-only)** — no code, providers, or
-loops exist yet.
+Current phase: **Phase 2 implementation.** Slice 1 (read-only ALFRED adapter and
+durable vintage cache) is complete and repaired; Slice 2 is the uniform
+point-in-time input layer. Schedulers, execution paths, forecasting models,
+schema adoption, and external publication remain gated.

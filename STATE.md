@@ -1,6 +1,6 @@
 # STATE.md — ADLS (Affluent Discretionary Liquidity Stress Program)
 
-*Last updated: 2026-07-20.* **New session? Read `HANDOFF.md` first** — the
+*Last updated: 2026-07-21.* **New session? Read `HANDOFF.md` first** — the
 full narrative of how this repo got here and the Slice 2 starting point.
 
 ## Phase
@@ -14,19 +14,23 @@ forecasting models, schema adoption, external publication.
 
 ## Current MVP scope
 
-- In scope (definition work only): select the candidate indicator basket
-  (affluent discretionary liquidity stress components), document each series'
-  provenance / release lag / revision behavior, and specify one deterministic
-  composite stress measure with thresholds — on historical **vintage (as-of)**
-  data, producing a research-only report.
-- Explicitly deferred: provider adapters, any scheduled loop, forecasting
-  models, cross-system signal feeds, anything execution-capable.
+- In scope: the approved read-only FRED/ALFRED adapter and durable vintage
+  cache; a uniform local-archive/PIT input layer; the deterministic composite
+  engine in spec §1-§7; the §9/§14 validation harness; and a local weekly
+  research-report generator.
+- Explicitly deferred: any scheduled loop, new provider, forecasting model,
+  schema adoption, external publication, cross-system signal feed, or anything
+  execution-capable unless separately approved.
 
 ## Approved decisions
 
 - 2026-07-19 — Purpose confirmed by owner: macro/market **leading-indicator
   research system** for affluent-household discretionary liquidity stress;
   research-only advisory layer for the wider research family.
+- 2026-07-21 — Owner approved the repair bundle: preserve and correct ICI
+  archive provenance; pin WRMFNS weekday mapping, pooled-family staleness,
+  archive release-stage/effective-availability rules, and a non-additive-safe
+  validation outcome; then harden ALFRED cache coverage and fetch auditing.
 - 2026-07-19 — Bootstrap scaffold adopted from playbook templates; governing
   policy docs copied locally (safety, label, verification, maker_checker, report).
 - 2026-07-19 — Owner approved the CLAUDE.md §10 operating fields: providers
@@ -49,7 +53,7 @@ forecasting models, schema adoption, external publication.
 - 2026-07-19 — Owner approved **Indicator Basket v1** (all four decision points
   of `docs/indicator_basket_proposal.md`): 9-series vintage-validatable core,
   affluent overlay as report-context-only, weekly manual self-archive routine
-  (first pull executed; ICI secured), DFA conflict resolved (FRED live for
+  (first pull executed; ICI provenance repaired 2026-07-21), DFA conflict resolved (FRED live for
   percentile headline series; liquid-asset detail via federalreserve.gov CSV).
 
 ## Safety rules (in force)
@@ -74,7 +78,7 @@ Loops produce findings and reports only — never actions.
 
 | Loop | Cadence | Bounds / stop conditions | Status |
 | --- | --- | --- | --- |
-| (none) | — | — | Not authorized in Bootstrap |
+| (none) | — | — | Scheduling remains gated in Phase 2 |
 
 ## Blockers
 
@@ -84,20 +88,26 @@ Loops produce findings and reports only — never actions.
 
 ## Last checkpoint
 
+- 2026-07-21 — Slice 1 repair complete: current-year ICI provenance captured
+  without overwriting prior evidence; deterministic spec gaps pinned; ALFRED
+  observation fetches capped to the vintage-date snapshot; endpoint audit rows
+  now carry actual status/rate-limit telemetry; cache PIT reads enforce declared
+  non-regressing coverage. Verification: 24/24 tests, ruff, mypy, SQLite
+  integrity, and zero overlapping spans. Next: Slice 2 against the repaired
+  archive contract.
 - 2026-07-20 — Phase 2 Slice 1 complete: ALFRED adapter + span-based vintage
   cache built and live-verified (17/17 tests, ruff, mypy; three series
   backfilled; 2013 vintage depth resolved — full history to 1992, no fallback
   needed). Timeout-retry bug found by live fire and fixed with regression
-  tests. Next: Slice 2 (uniform input layer).
+  tests.
 - 2026-07-19 — Documentation-only bootstrap committed and pushed with owner
   approval: 3 commits (inherited governance / operating scaffold / library map),
   explicit paths only.
 
 ## Next recommended action
 
-- Execute Phase 2 Slice 1 (skeleton, config, ALFRED client, vintage cache)
-  per the approved plan (~/.claude/plans/imperative-gathering-hummingbird.md,
-  mirrored in tasks/todo.md). Visa SMI methodology resolved during planning
-  (0–200 diffusion index centered at 100 → §3.2 transform locked); the 2013
-  vintage-depth question is Slice 1's live-smoke exit criterion. Spec
-  convention pins live in canonical/spec_errata.md (approved with the plan).
+- Execute Phase 2 Slice 2: normalized archive CSV validation plus a uniform PIT
+  loader. Use `max(release_date, retrieval_date)`, explicit release stages,
+  bounded archive coverage, final-only canonical UMich, and the ALFRED coverage
+  guard. The binding conventions are in `canonical/spec_errata.md`; the test
+  checklist is in `tasks/todo.md` and the narrative contract is in `HANDOFF.md`.

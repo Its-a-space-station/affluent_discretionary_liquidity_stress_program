@@ -1,4 +1,4 @@
-# HANDOFF — session of 2026-07-19/20
+# HANDOFF — sessions of 2026-07-19 through 2026-07-21
 
 For the next session. Read this WITH `STATE.md` (live snapshot) and
 `tasks/todo.md` (slice checklist) — the SessionStart hook auto-injects those
@@ -15,8 +15,9 @@ agent papers, 26 time-series papers) were agent-reviewed into doctrine-mapped
 reference docs, and ADLS went from an empty GitHub repo to: checklist-
 compliant bootstrap → owner-approved Indicator Basket v1 → checker-hardened
 Composite Spec v1.2 → **Phase 2 authorized** → **Slice 1 built, live-verified,
-and pushed** (`537c1d0`). Everything below exists to let you continue from
-Slice 2 without re-deriving any of it.
+and pushed** (`537c1d0`) → **Slice 1 repaired locally on 2026-07-21** after a
+whole-repo review. Everything below exists to let you continue from Slice 2
+without re-deriving any of it.
 
 ## What was decided (all owner-approved, in order)
 
@@ -50,19 +51,24 @@ Slice 2 without re-deriving any of it.
    models, schema (belief-card) adoption, external publication.
 7. **Spec errata** (`canonical/spec_errata.md`, binding on maker AND checker):
    z-window excludes current obs, population σ; decimal(6) half-even +
-   canonical JSON serialization; WRMFNS staleness 45d; weekly→monthly = mean
-   of Wednesday observations; baseline exact specs must be pinned there
+   canonical JSON serialization; WRMFNS staleness 45d and Monday→Wednesday
+   mapping; complete pooled families only; archive availability is the later of
+   release/retrieval with explicit stages and bounded coverage; validation uses
+   an equal mean of independently detrended real-PCE component gaps, never a
+   sum of chained-dollar levels. Baseline exact specs must be pinned there
    BEFORE the first real-data validation run (item 5, still placeholder).
 
-## Where the code stands (Slice 1 of 7, complete)
+## Where the code stands (Slice 1 of 7, complete and repaired)
 
 - `src/adls/`: config (only getenv site, never echoes), registry (Basket v1 as
-  data), contracts, `alfred/client.py` (realtime-range observations +
-  vintagedates, 429/timeout retry with backoff, **URL-free errors** — the key
-  rides the query string), `alfred/cache.py` (span-based SQLite vintage cache:
-  value at vintage V = span with realtime_start ≤ V ≤ realtime_end),
-  `cli.py` (`adls fetch`).
-- Tests 17/17 green + ruff + mypy (`.venv`, Python 3.14): unit + posture suite
+  data, including WRMFNS +2-day canonical shift), contracts,
+  `alfred/client.py` (realtime-range observations + vintagedates, 429/timeout
+  retry with backoff, per-call status telemetry, **URL-free errors** — the key
+  rides the query string), `alfred/cache.py` (span-based SQLite vintage cache
+  with declared, non-regressing coverage), `cli.py` (`adls fetch`). Fetches now
+  cap observations to the latest vintage returned by the preceding vintage-date
+  call and audit the two endpoints separately.
+- 24/24 unit + posture tests, ruff, and mypy are green (`.venv`, Python 3.14)
   (env-token confinement, requests confined to alfred/, forbidden-vocabulary
   scan with sort_order/ORDER BY exemptions, no scheduler artifacts).
 - **Live-verified**: RSFSDP (166 vintages/2,512 spans), RSFHFS (166/2,607),
@@ -74,6 +80,11 @@ Slice 2 without re-deriving any of it.
 - Live fire found+fixed one real bug: network timeouts bypassed the retry
   loop (now retried; regression tests pin it, including that timeout
   exceptions never leak the keyed URL).
+- Whole-repo review found+fixed additional defects: arbitrary future cache
+  vintages were accepted despite a coverage table; observation and vintage-date
+  calls could straddle releases; audit rows hard-coded status/endpoint/429 data;
+  `--series` accepted an empty list and archive-only IDs; the ICI log recorded an
+  obsolete 2025 URL; and four spec conventions were incomplete or invalid.
 - `FRED_API_KEY` is in `.env` (git-ignored, owner-entered via hidden prompt;
   **never read or log it** — source it: `set -a; source .env; set +a`).
 
@@ -82,17 +93,21 @@ Slice 2 without re-deriving any of it.
 Per the approved plan (full text in the plan file; slices also in todo):
 - `src/adls/inputs/archive.py`: normalized-CSV contract for manual
   `data_archive/` sources — columns `series_id, observation_date, value_text,
-  release_date, source_file, retrieved_at`; ValidationResult (collect
-  errors/warnings, NEVER raise on data issues — Trading_consultant
-  data_contract.py shape, already in `contracts.py`).
+  release_date, release_stage, source_file, retrieved_at`; ValidationResult
+  (collect errors/warnings, NEVER raise on data issues — Trading_consultant
+  data_contract.py shape, already in `contracts.py`). Stage values are
+  `preliminary|final|revision|not_applicable`.
 - `src/adls/inputs/loader.py`: uniform PIT view — for assembly date D, per
-  series: latest vintage ≤ D (ALFRED via cache) or rows with release_date ≤ D
-  (archive), one row shape for both. Archive rows are spans with
-  realtime_start = release_date.
-- Tests: contract fixtures (missing column/unsorted/duplicate/gap →
-  collected, not raised); PIT boundaries (vintage == D inclusive; D+1
-  provably unselectable); UMich rows from `data_archive/2026-07-19/` load
-  end-to-end.
+  series: ALFRED spans only when D is within declared cache coverage; archive
+  rows only when `max(release_date, date(retrieved_at)) ≤ D` and D is within
+  archive coverage. Archive episodes are non-overlapping; a later stage closes
+  the previous episode the day before. Canonical UMich selects finals only;
+  prelims are provisional-nowcast-only.
+- Tests: contract fixtures (missing column/invalid stage/unsorted/duplicate/gap
+  → collected, not raised); PIT boundaries (vintage == D inclusive; D+1
+  provably unselectable); late retrieval cannot appear early; prelim closes
+  when final arrives; final-only canonical selection; both providers reject D
+  beyond coverage; normalized fixture loads end-to-end.
 - Also: update `data_archive/README.md` with the normalize-to-CSV step for
   the weekly routine.
 Then Slices 3–7: engine core → calendar/canonicalization/frozen store/bands →
@@ -125,8 +140,10 @@ tests, and exit criteria are all in the plan file.
   execution/sizing code. UMich data is internal-use-only (no raw levels in
   committed files or external-able reports).
 - Weekly manual archive routine is due each Friday (`data_archive/README.md`)
-  — ICI is the source that decays (20-week window). First pull was
-  2026-07-19 (ICI secured; FINRA/UMich/EGI/JPMC/BofA are manual steps).
+  — ICI is the source that decays (20-week window). The 2026-07-19 ICI log used
+  an obsolete 2025-named URL; the raw file was preserved and correct current-
+  year provenance was captured in `2026-07-21/` (byte-identical). FINRA/UMich/
+  EGI/JPMC/BofA are still manual steps.
 
 ## Beyond this repo (context the next session may need)
 
@@ -154,7 +171,7 @@ tests, and exit criteria are all in the plan file.
 
 ## The acid test
 
-You should be able to: read this + STATE + todo, `cd` here, `source .env`
-safely, run `.venv/bin/pytest -q` (expect 17 green), and start writing
-`src/adls/inputs/archive.py` against the plan — without re-opening any
-question settled above.
+You should be able to: read this + STATE + todo, `cd` here, source the local
+git-ignored environment without printing it, run `.venv/bin/pytest -q`, and
+start writing `src/adls/inputs/archive.py` against the repaired contract —
+without re-opening any question settled above.

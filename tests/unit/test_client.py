@@ -22,9 +22,11 @@ class FakeSession:
     def __init__(self, responses: list[FakeResponse]) -> None:
         self._responses = responses
         self.calls = 0
+        self.safe_params: list[dict[str, Any]] = []
 
     def get(self, url: str, params: dict[str, Any], timeout: int) -> FakeResponse:
         self.calls += 1
+        self.safe_params.append({k: v for k, v in params.items() if k != "api_key"})
         return self._responses.pop(0)
 
 
@@ -45,15 +47,23 @@ def test_observations_single_page() -> None:
         {"date": "2013-04-01", "realtime_start": "2013-05-13",
          "realtime_end": "9999-12-31", "value": "100.0"},
     ]}
-    rows = _client([FakeResponse(200, payload)]).get_observations("RSFSDP")
+    client = _client([FakeResponse(200, payload)])
+    rows = client.get_observations("RSFSDP", realtime_end="2026-07-20")
     assert len(rows) == 1
     assert rows[0].realtime_start == "2013-05-13"
+    assert client.last_request_stats.endpoint == "observations"
+    assert client.last_request_stats.http_status == 200
+    assert client.last_request_stats.requests_made == 1
+    assert client._session.safe_params[-1]["realtime_end"] == "2026-07-20"
 
 
 def test_429_backoff_then_success() -> None:
     ok = FakeResponse(200, {"observations": []})
     client = _client([FakeResponse(429), FakeResponse(429), ok])
     assert client.get_observations("RSFSDP") == []
+    assert client.last_request_stats.rate_limited == 2
+    assert client.last_request_stats.requests_made == 3
+    assert client.last_request_stats.http_status == 200
 
 
 def test_errors_never_contain_urls_or_key() -> None:
@@ -65,6 +75,8 @@ def test_errors_never_contain_urls_or_key() -> None:
     assert "api_key" not in message
     assert "fake-key-abc" not in message
     assert "status=403" in message
+    assert exc_info.value.stats.endpoint == "observations"
+    assert exc_info.value.stats.http_status == 403
 
 
 def test_exhausted_retries_raise_urlfree() -> None:
@@ -72,6 +84,8 @@ def test_exhausted_retries_raise_urlfree() -> None:
     with pytest.raises(AlfredClientError) as exc_info:
         client.get_vintage_dates("RSFSDP")
     assert "http" not in str(exc_info.value).lower()
+    assert exc_info.value.stats.endpoint == "vintagedates"
+    assert exc_info.value.stats.requests_made == 3
 
 
 class TimeoutThenOkSession:

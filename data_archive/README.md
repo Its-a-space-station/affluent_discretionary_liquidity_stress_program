@@ -13,12 +13,17 @@ committed.
 
 ```
 data_archive/YYYY-MM-DD/          # retrieval date (not reference-period date)
-  ARCHIVE_LOG.md                  # what was pulled, exact URL, timestamp, bytes
+  ARCHIVE_LOG.md                  # URL, timestamp, bytes, SHA-256, response metadata
   <source>_<name>.<ext>           # the raw files, unmodified
 ```
 
 Never overwrite a prior day's directory. The raw file is the evidence record;
 transformations happen elsewhere.
+
+Every successful log records the requested and effective URL, retrieval time,
+byte count, SHA-256, HTTP status, and available server `Last-Modified` value.
+Incorrect or incomplete pulls are marked invalid in place but retained; a
+repair goes in a new retrieval-date directory.
 
 ## Weekly routine (manual until a read-only adapter is authorized)
 
@@ -35,7 +40,32 @@ Suggested slot: Friday afternoon (after the H.8 release lands).
 FRED/ALFRED core-basket series need **no** archiving — ALFRED is the vintage
 archive (that's why the core basket was restricted to vintage-bearing series).
 
+## Normalized CSV contract (Slice 2 input)
+
+Raw evidence is never edited. A normalization step writes git-ignored CSVs
+under `data/normalized_archive/` with these required columns:
+
+`series_id, observation_date, value_text, release_date, release_stage, source_file, retrieved_at`
+
+- `retrieved_at` is the actual UTC ISO-8601 retrieval timestamp; it is not
+  reconstructed from a nominal release calendar.
+- `release_stage` is one of `preliminary`, `final`, `revision`, or
+  `not_applicable`.
+- Effective availability is `max(release_date, UTC date(retrieved_at))`. A late
+  download is never treated as knowable before ADLS actually archived it.
+- For each `(series_id, observation_date)`, value episodes are ordered by
+  effective availability. A later episode closes the prior one on the previous
+  calendar day. Conflicting values on the same effective date are validation
+  errors, never silently resolved.
+- Each series' latest successfully processed retrieval date is its declared
+  archive coverage. The final known episode is bounded by that coverage date; a
+  loader must refuse an assembly date beyond that series' coverage.
+- Canonical UMich input uses `final` rows only. A `preliminary` row may appear
+  only in a clearly labeled provisional nowcast.
+
 ## First pull — 2026-07-19
 
-ICI MMF secured (the time-sensitive one). FINRA / UMich / EGI / JPMC / BofA
-logged as manual for the first weekly pass. See `2026-07-19/ARCHIVE_LOG.md`.
+The ICI pull used an obsolete 2025-named URL, so its provenance is invalid even
+though its bytes match the later current-year retrieval. The raw evidence is
+preserved. Correct 2026 provenance was captured on 2026-07-21; see both dated
+logs. FINRA / UMich / EGI / JPMC / BofA remain manual first-pass items.

@@ -13,8 +13,8 @@ class ObservationSpan:
     """One value-episode in ALFRED realtime semantics.
 
     The value for (series, observation_date) at vintage V is the span with
-    realtime_start <= V <= realtime_end. Archive rows use
-    realtime_start = release_date and an open realtime_end.
+    realtime_start <= V <= realtime_end. Self-archive loaders derive bounded,
+    non-overlapping spans from effective availability and archive coverage.
     """
 
     series_id: str

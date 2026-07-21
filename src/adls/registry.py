@@ -27,6 +27,7 @@ class SeriesSpec:
     tier: str | None  # "A" | "B" | None (overlay/outcome are tierless)
     transform: str  # tag consumed by engine.transforms
     license: str  # public | visa_citation | umich_internal
+    canonical_date_shift_days: int = 0
 
 
 REGISTRY: tuple[SeriesSpec, ...] = (
@@ -45,7 +46,7 @@ REGISTRY: tuple[SeriesSpec, ...] = (
                "pooled_yoy_growth", "public"),
     SeriesSpec("WRMFNS", "Retail money market funds (H.6, NSA)",
                "household_liquidity", "leading", "alfred", "w", 45, "A",
-               "pooled_yoy_growth", "public"),
+               "pooled_yoy_growth", "public", canonical_date_shift_days=2),
     # Leading family: umich_top_tercile (spec 3.4; manual archive; internal-use license)
     SeriesSpec("UMICH_SCA_T2N_TOP", "UMich ICS, top income tercile (Table 2n)",
                "umich_top_tercile", "leading", "archive", "m", 40, "A",
@@ -57,9 +58,11 @@ REGISTRY: tuple[SeriesSpec, ...] = (
                "strain", "overlay", "alfred", "q", 110, None, "level", "public"),
     # Validation outcome series (spec 9 — ground truth, not composite inputs)
     SeriesSpec("DRCARX1Q020SBEA", "Real PCE: recreation services (Q)",
-               "outcome", "outcome", "alfred", "q", 0, None, "outcome_component", "public"),
+               "outcome", "outcome", "alfred", "q", 0, None,
+               "quarterly_log_trend_gap_component", "public"),
     SeriesSpec("DFSARX1Q020SBEA", "Real PCE: food services & accommodations (Q)",
-               "outcome", "outcome", "alfred", "q", 0, None, "outcome_component", "public"),
+               "outcome", "outcome", "alfred", "q", 0, None,
+               "quarterly_log_trend_gap_component", "public"),
 )
 
 LEADING_FAMILIES: tuple[str, ...] = (

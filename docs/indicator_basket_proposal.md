@@ -18,7 +18,7 @@ market outcomes — see Selection discipline at the end.
 - **E. Sentiment & credit access** (survey-leading psychology)
 - **F. Affluent-sliced overlays** (the few genuinely income/wealth-cut sources)
 
-## Proposed CORE basket (vintage-validatable; 9 series)
+## Approved core basket (vintage-validatable; 9 series)
 
 Composite inputs must survive as-of validation. All have ALFRED vintages except
 where noted.
@@ -37,9 +37,10 @@ where noted.
 
 Deliberately excluded from core: `TDSP` (modeled composite, 2024 series
 redesign truncated history to 2005; double-counts #4/#7 inputs) — context only.
-Quarterly real PCE pair (`DRCARX1Q020SBEA`, `DFSARX1Q020SBEA`) — validation
-cross-check, not composite input (no monthly on FRED; BEA monthly Table 2.4.6U
-has no vintage archive). `BOGZ1FL193020005Q` household checkable deposits —
+Quarterly real PCE pair (`DRCARX1Q020SBEA`, `DFSARX1Q020SBEA`) — independently
+detrended components of a synthetic validation cross-check, never summed as
+chained-dollar levels; not composite inputs (no monthly on FRED; BEA monthly
+Table 2.4.6U has no vintage archive). `BOGZ1FL193020005Q` household checkable deposits —
 vintages only since 2019; revisit when depth accrues. `RSEAS` — same family as
 #2/#3; adding it double-counts the retail cluster.
 
@@ -96,12 +97,13 @@ two members per cluster, weighted as families.
 
 - `REVOLSL`: billions→millions units change at the 2025-02-07 vintage
 - `TDSP`: 2024 release redesign; history truncated to 2005Q1; FOR discontinued
-- PCE chained-dollar base changes across vintages (2005$→2009$→2012$→2017$) — work in growth rates
+- PCE chained-dollar base changes across vintages (2005$→2009$→2012$→2017$) —
+  work in within-component growth/trend gaps and never add component levels
 - NY Fed credit data: Equifax Risk Score 3.0 → **VantageScore 4.0 at 2026Q1**
 - ICI weekly MMF page holds **only the last 20 weeks** — self-archiving must start immediately
 - FRED API: key required; vintages via `realtime_start`/`realtime_end`; rate limit unpublished (handle 429 with backoff)
 
-## Immediate operational proposal (needs owner approval)
+## Approved archive routine
 
 Start a dated self-archive **now** for the no-vintage sources (ICI weekly XLS,
 UMich Table 2n, EGI XLSX, JPMC/BofA releases, FINRA XLSX): a manual weekly
@@ -127,9 +129,10 @@ rejected candidate stays documented here (no silent drops).
    before the composite is locked.
 2. **Overlay approved** as report-context-only until self-archived as-of
    history accrues.
-3. **Weekly self-archive authorized** (manual). First pull executed same day:
-   ICI secured (the decaying source); FINRA/UMich/EGI/JPMC/BofA documented as
-   manual steps — see `data_archive/README.md`.
+3. **Weekly self-archive authorized** (manual). The first ICI log used an
+   obsolete 2025-named URL; correct 2026 provenance was captured 2026-07-21
+   without overwriting the original evidence. FINRA/UMich/EGI/JPMC/BofA remain
+   documented manual steps — see `data_archive/README.md`.
 4. **DFA conflict resolved** by direct FRED check (see overlay table): release
    live, liquid-asset percentile detail discontinued on FRED ~2022 → use
    federalreserve.gov CSV for that detail.

@@ -12,7 +12,8 @@ stress in affluent-household discretionary spending** (e.g., credit and deposit
 flows, luxury/discretionary sales, delinquency and drawdown behavior) and turns
 it into verified, labeled findings and reports usable as a **leading-indicator
 signal layer** for the wider research family. It informs a human; it never acts.
-Current phase: **Bootstrap (documentation-only)**.
+Current phase: **Phase 2 implementation**. The exact authorized and gated scope
+is recorded in `STATE.md`; do not infer broader operational authority from it.
 
 ## 2. Startup reading sequence
 
@@ -100,10 +101,11 @@ Explicit, in-context human approval is required before:
   schema enums**; extending `object_type`/`project` in the playbook schemas
   requires a playbook-side change with owner approval (tracked in STATE blockers).
 - **Project slug:** `adls`.
-- **Providers (read-only; owner-approved 2026-07-19 — building any adapter
-  still requires separate approval per §9):** public macro/credit series
-  (e.g., FRED/ALFRED vintages), retail & luxury sales releases, deposit-flow
-  data. Respect terms & rate limits; no scraping that evades provider terms.
+- **Providers (read-only; owner-approved 2026-07-19, Phase 2 implementation
+  authorized 2026-07-20):** public macro/credit series (including the built
+  FRED/ALFRED adapter and local self-archive), retail & luxury sales releases,
+  and deposit-flow data. New providers still require §9 approval. Respect terms
+  and rate limits; no scraping that evades provider terms.
 - **Criteria summary (owner-approved 2026-07-19):** deterministic composite
   stress indicators with predefined thresholds and bands; every component
   series documented with provenance, release lag, and revision behavior.
@@ -113,5 +115,6 @@ Explicit, in-context human approval is required before:
   Its outputs carry research disclaimers and are never consumed as automated
   triggers by any trading-adjacent system.
 - **Out of scope for now:** per-security recommendations (belongs to the
-  screener projects), any live scheduled loop, provider adapters, cross-system
-  integrations, forecasting models beyond the deterministic composite.
+  screener projects), live scheduled loops, execution-capable paths,
+  cross-system integrations, forecasting models, schema adoption, and external
+  publication. Additional providers require explicit approval.

@@ -32,15 +32,16 @@
       Consequence for composite spec: choose two-tier composite (long-history
       8-series + Visa-augmented from 2024-05) vs single short-window design.
 - [~] Weekly as-of self-archive (owner-approved 2026-07-19; manual — see
-      `data_archive/README.md`). First pull done: ICI secured; FINRA/UMich/
-      EGI/JPMC/BofA are manual steps for the first full weekly pass.
+      `data_archive/README.md`). Original ICI log used an obsolete 2025-named
+      URL; correct 2026 provenance captured 2026-07-21 without overwriting the
+      evidence. FINRA/UMich/EGI/JPMC/BofA remain manual first-pass steps.
 - [x] Specify the deterministic composite stress measure — **v1.1 APPROVED
       2026-07-19** (`docs/composite_spec_v1.md`; all six decision points as
       written; checker-reviewed and rebuilt before approval).
-- [ ] Resolve `validation_pending`: Visa SMI methodology note (confirm
-      momentum-around-100 construction → level-vs-100 transform).
-- [ ] Resolve `validation_pending`: confirm 2013-era RSFSDP/RSFHFS vintages
-      carry full back-history for 10-year z-windows (ALFRED, read-only).
+- [x] Resolve Visa SMI methodology: 0-200 diffusion index centered at 100;
+      level-vs-100 transform locked. (2026-07-20)
+- [x] Confirm 2013-era RSFSDP/RSFHFS vintages carry full back-history for
+      10-year z-windows: both reach 1992. (2026-07-20)
 - [x] Phase 2 (implementation) authorization — **granted 2026-07-20** via
       approved plan (scope-guard lift for adapter/engine/validation/report;
       schedulers, execution paths, forecasting, schemas, publication stay gated).
@@ -53,7 +54,15 @@
       question RESOLVED (2013 vintages carry history to 1992 — errata item 6);
       live fire caught + fixed a real bug (network timeouts bypassed the retry
       loop; now retried with backoff, regression-tested).
+- [x] Slice 1 repair — preserve/correct ICI evidence; pin WRMFNS calendar,
+      required-member staleness, archive availability/stages, and non-additive
+      validation outcome; enforce coherent ALFRED cutoff, truthful endpoint
+      audit telemetry, and non-regressing cache coverage. (2026-07-21)
 - [ ] Slice 2 — uniform input layer (archive CSV contract + PIT loader).
+      Required tests: missing columns/invalid stages/unsorted rows/duplicates
+      collect errors; late retrieval is unavailable before `retrieved_at`;
+      preliminary spans close when final arrives; canonical UMich selects final
+      only; archive and ALFRED lookups refuse dates beyond declared coverage.
 - [ ] Slice 3 — engine core (§3-§5, §7): named-episode sign tests, units-break
       fixture, byte-identity golden.
 - [ ] Slice 4 — calendar, canonicalization, frozen store, bands (§2, §6).
@@ -93,7 +102,7 @@
 
 ## Future integrations (gated — not authorized by this list)
 
-- [!] Read-only provider adapters (FRED/ALFRED vintages, sales releases) —
-      respect terms & rate limits; requires owner approval.
+- [!] Additional read-only provider adapters beyond the authorized ALFRED/local
+      archive scope — respect terms and rate limits; require owner approval.
 - [!] Cross-system advisory feed to the research family — human-cited reports
       only until explicitly approved.

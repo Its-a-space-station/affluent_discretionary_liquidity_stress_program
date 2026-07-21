@@ -27,16 +27,28 @@ MAX_RETRIES = 3
 MIN_INTERVAL_S = 0.7  # politeness; rate limit is unpublished (handle 429s)
 
 
-class AlfredClientError(RuntimeError):
-    """Raised on request failure. Message NEVER contains URLs/params/keys."""
-
-
 @dataclass(frozen=True)
 class RawObservation:
     observation_date: str
     realtime_start: str
     realtime_end: str
     value_text: str
+
+
+@dataclass(frozen=True)
+class RequestStats:
+    endpoint: str
+    http_status: int | None
+    requests_made: int
+    rate_limited: int
+
+
+class AlfredClientError(RuntimeError):
+    """Raised on request failure. Message NEVER contains URLs/params/keys."""
+
+    def __init__(self, message: str, stats: RequestStats) -> None:
+        super().__init__(message)
+        self.stats = stats
 
 
 def parse_value(value_text: str) -> float | None:
@@ -58,6 +70,10 @@ class AlfredClient:
         self._session = session or requests.Session()
         self._sleep = sleep_fn
         self._last_request_at = 0.0
+        self._active_endpoint = ""
+        self._last_http_status: int | None = None
+        self._requests_made = 0
+        self._rate_limited = 0
 
     # -- public API ---------------------------------------------------------
 
@@ -68,6 +84,7 @@ class AlfredClient:
         realtime_end: str = FULL_REALTIME_END,
     ) -> list[RawObservation]:
         """All observation spans for a series across the realtime range."""
+        self._begin_call("observations")
         rows: list[RawObservation] = []
         offset = 0
         while True:
@@ -96,6 +113,7 @@ class AlfredClient:
             offset += PAGE_LIMIT
 
     def get_vintage_dates(self, series_id: str) -> list[str]:
+        self._begin_call("vintagedates")
         dates: list[str] = []
         offset = 0
         while True:
@@ -111,6 +129,21 @@ class AlfredClient:
 
     # -- internals ----------------------------------------------------------
 
+    @property
+    def last_request_stats(self) -> RequestStats:
+        return RequestStats(
+            endpoint=self._active_endpoint,
+            http_status=self._last_http_status,
+            requests_made=self._requests_made,
+            rate_limited=self._rate_limited,
+        )
+
+    def _begin_call(self, endpoint: str) -> None:
+        self._active_endpoint = endpoint
+        self._last_http_status = None
+        self._requests_made = 0
+        self._rate_limited = 0
+
     def _get_json(self, endpoint: str, params: dict[str, str | int]) -> dict:
         full_params: dict[str, str | int] = {
             "api_key": self._api_key, "file_type": "json", **params
@@ -120,6 +153,7 @@ class AlfredClient:
         last_exc_name: str | None = None
         for attempt in range(MAX_RETRIES):
             self._politeness_wait()
+            self._requests_made += 1
             try:
                 resp = self._session.get(url, params=full_params, timeout=60)
             except requests.RequestException as exc:  # message may embed URL
@@ -129,20 +163,25 @@ class AlfredClient:
                 self._sleep(2.0 * (attempt + 1))
                 continue
             last_status = resp.status_code
+            self._last_http_status = resp.status_code
             if resp.status_code == 200:
                 try:
                     return resp.json()
                 except ValueError:
                     raise AlfredClientError(
-                        f"FRED response not JSON: {endpoint} status=200"
+                        f"FRED response not JSON: {endpoint} status=200",
+                        self.last_request_stats,
                     ) from None
+            if resp.status_code == 429:
+                self._rate_limited += 1
             if resp.status_code == 429 or resp.status_code >= 500:
                 self._sleep(2.0 * (attempt + 1))
                 continue
             break  # 4xx other than 429: not retryable
         detail = f"status={last_status}" if last_status else f"({last_exc_name})"
         raise AlfredClientError(
-            f"FRED request failed: {endpoint} {detail} after {attempt + 1} attempt(s)"
+            f"FRED request failed: {endpoint} {detail} after {attempt + 1} attempt(s)",
+            self.last_request_stats,
         )
 
     def _politeness_wait(self) -> None:

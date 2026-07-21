@@ -57,11 +57,12 @@ Every report begins with, verbatim or in close paraphrase:
 Neutral, observational, and specific. State what was measured and how confident
 we are. Avoid persuasive or directive language. The reader decides.
 
-## 7. Bootstrap status
+## 7. Phase 2 status
 
-No reports are generated yet. This is the contract a future reporting layer must
-meet, and a prerequisite for the reporting gate in
-[promotion_policy.md](promotion_policy.md).
+The weekly report generator is authorized but not implemented yet. This remains
+its binding contract and a prerequisite for the reporting gate in
+[promotion_policy.md](promotion_policy.md); external publication still requires
+explicit approval.
 
 ## 8. Playbook v2: evidence alignment, pointers, canonical order
 

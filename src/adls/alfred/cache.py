@@ -64,6 +64,10 @@ def _iso_now() -> str:
     return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+class VintageCoverageError(LookupError):
+    """Raised when a PIT lookup falls outside declared cache coverage."""
+
+
 class VintageCache:
     def __init__(self, db_path: Path) -> None:
         self._db_path = db_path
@@ -147,7 +151,13 @@ class VintageCache:
                 INSERT INTO series_coverage (series_id, complete_through_vintage, last_backfill_at)
                 VALUES (?, ?, ?)
                 ON CONFLICT (series_id) DO UPDATE SET
-                    complete_through_vintage = excluded.complete_through_vintage,
+                    complete_through_vintage = CASE
+                        WHEN series_coverage.complete_through_vintage IS NULL
+                          OR excluded.complete_through_vintage
+                             > series_coverage.complete_through_vintage
+                        THEN excluded.complete_through_vintage
+                        ELSE series_coverage.complete_through_vintage
+                    END,
                     last_backfill_at = excluded.last_backfill_at
                 """,
                 (series_id, through_vintage, _iso_now()),
@@ -164,10 +174,29 @@ class VintageCache:
             ).fetchall()
         return [r["vintage_date"] for r in rows]
 
+    def complete_through_vintage(self, series_id: str) -> str | None:
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT complete_through_vintage FROM series_coverage "
+                "WHERE series_id = ?",
+                (series_id,),
+            ).fetchone()
+        return row["complete_through_vintage"] if row else None
+
     def series_history_at_vintage(
         self, series_id: str, vintage: str
     ) -> list[tuple[str, str]]:
         """[(observation_date, value_text)] as knowable at `vintage`."""
+        complete_through = self.complete_through_vintage(series_id)
+        if complete_through is None:
+            raise VintageCoverageError(
+                f"{series_id} has no declared coverage; cannot serve vintage {vintage}"
+            )
+        if vintage > complete_through:
+            raise VintageCoverageError(
+                f"{series_id} vintage {vintage} exceeds complete coverage "
+                f"through {complete_through}"
+            )
         with self._connect() as conn:
             rows = conn.execute(
                 """
