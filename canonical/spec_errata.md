@@ -1,9 +1,9 @@
 # Spec Errata — owner-approved convention pins
 
-Items 1-6 were approved 2026-07-20 with the Phase 2 plan. Items 7-9 were
-approved as repair pins on 2026-07-21. These close conventions the spec (v1.2)
-left open or stated incorrectly; each entry is binding on both the engine
-(maker) and the checker.
+Items 1-6 were approved 2026-07-20 with the Phase 2 plan. Items 7-10 were
+approved as repair or implementation pins on 2026-07-21. These close
+conventions the spec (v1.2) left open or stated incorrectly; each entry is
+binding on both the engine (maker) and the checker.
 
 1. **z-score window**: the trailing window EXCLUDES the current observation
    (consistent with §2's percentile convention); standard deviation is the
@@ -60,3 +60,16 @@ left open or stated incorrectly; each entry is binding on both the engine
    are required. The primary event is a synthetic gap at or below -2.0% in
    either of the next two quarters. This is a research outcome, not a BEA
    aggregate or contribution measure.
+10. **Band reference, boundaries, and state**: Tier-A percentile thresholds use
+    all prior numeric values in the expanding frozen canonical history; the
+    current month is excluded. Linear-interpolation boundaries are Normal
+    `<70`, Watch `>=70 and <85`, Elevated `>=85 and <=95`, and High `>95`.
+    Banding requires at least 36 frozen canonical months and 35 prior numeric
+    Tier-A values. The 36th month starts dwell, so the earliest confirmed band
+    is month 37. Any raw-band change restarts the two-month dwell and direct
+    band jumps are allowed. A month with no Tier-A value publishes no current
+    band, clears pending dwell, and retains the prior confirmed state only for
+    later state-machine continuity. Under item 2's publication rule,
+    interpolated thresholds are rendered to six-place half-even precision
+    before boundary classification so the persisted threshold and band replay
+    without contradiction.

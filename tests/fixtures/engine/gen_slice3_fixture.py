@@ -13,7 +13,7 @@ from adls.contracts import PointInTimeResult, PointInTimeValue, ValidationResult
 FIXTURE_PATH = Path(__file__).with_name("slice3_episode.json")
 
 FIXTURE_CONFIG: dict[str, Any] = {
-    "assembly_date": "2020-05-29",
+    "assembly_date": "2020-06-19",
     "monthly": {"count": 49, "start": "2016-04-01"},
     "quarterly": {"count": 21, "start": "2015-04-01"},
     "schema_version": "adls.slice3.fixture.v1",

@@ -23,6 +23,11 @@ def _render_number(value: float) -> str:
     return format(rounded, "f")
 
 
+def canonicalize_float(value: float) -> float:
+    """Return the six-place, half-even value represented at publication boundaries."""
+    return float(_render_number(value))
+
+
 def _render(value: JsonValue) -> str:
     if value is None:
         return "null"

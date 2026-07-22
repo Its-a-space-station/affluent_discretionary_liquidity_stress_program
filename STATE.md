@@ -1,7 +1,7 @@
 # STATE.md — ADLS (Affluent Discretionary Liquidity Stress Program)
 
 *Last updated: 2026-07-21.* **New session? Read `HANDOFF.md` first** — the
-full narrative of how this repo got here and the Slice 4 starting point.
+full narrative of how this repo got here and the Slice 5 starting point.
 
 ## Phase
 
@@ -89,6 +89,22 @@ Loops produce findings and reports only — never actions.
 
 ## Last checkpoint
 
+- 2026-07-21 — Phase 2 Slice 4 complete: a static 2013-2027 NYSE calendar
+  enforces Friday/next-business-day assemblies and derives canonical versus
+  provisional mode; canonical month M finalizes only at the first assembly on
+  or after the 15th of M+2. The live `canonical/frozen_sequence.jsonl` remains
+  intentionally empty pending the post-Slice-6 seeding decision. Its writer is
+  append-only under thread and process locks, embeds the redacted canonical
+  source assembly plus SHA-256, and revalidates source, vintages, observations,
+  licenses, composite arithmetic, chronology, and band replay on every read.
+  Tier-A bands use expanding prior frozen values, six-place thresholds, a
+  36-month/35-reference burn-in, and two-month dwell. Independent review found
+  and drove repairs for concurrent duplicate appends, persisted lookahead,
+  source/value corruption, threshold replay, caller-controlled mode, future
+  observations, and malformed dates; its final pass found no remaining issues.
+  The April 2020 canonical fixture now uses 2020-06-19 and is pinned at SHA-256
+  `d568528a50258674a29a8b943680dfe71c76dad3462896ed8e88b93326a78dc8`.
+  Verification: 79/79 tests, ruff, touched-file format check, and mypy.
 - 2026-07-21 — Phase 2 Slice 3 complete: the pure-stdlib maker engine computes
   one PIT assembly with pooled/sign-correct transforms, complete weekly-month
   aggregation, trailing population z-scores excluding the current observation,
@@ -96,7 +112,8 @@ Loops produce findings and reports only — never actions.
   and a separate Strain overlay. Canonical/provisional UMich modes are explicit;
   late-retrieval availability is rechecked; licensed transformed levels are
   redacted at serialization. Canonical JSON is six-place half-even, run-twice
-  byte-identical, and pinned at SHA-256 `9a455e9d13e77d405db37fad671b680dd93014d627164cfc6bb5d9ca96ab1438`.
+  byte-identical; Slice 4 later moved the fixture to its proper monthly
+  finalization date and re-pinned its SHA above.
   Independent review found and drove repairs for preliminary-stage leakage and
   incomplete weekly grids. Verification: 57/57 tests, ruff, and mypy.
 - 2026-07-21 — Phase 2 Slice 2 complete: normalized archive CSVs are validated
@@ -123,8 +140,8 @@ Loops produce findings and reports only — never actions.
 
 ## Next recommended action
 
-- Execute Phase 2 Slice 4: assembly calendar, monthly canonicalization,
-  append-only frozen store, and Tier-A bands under spec §2 and §6. Start
-  fail-before with holiday-Friday finalization edges, the 36-month burn-in,
-  two-month entry/exit dwell, rewrite refusal, and proof that later revisions
-  cannot alter an already frozen month.
+- Execute Phase 2 Slice 5: build the independent checker with its own SQL,
+  vintage selection, arithmetic, constants, percentile, and dwell paths;
+  posture-enforce that it imports nothing from maker/input/ALFRED modules, then
+  prove seeded ddof, percentile, dwell, PIT-boundary, and staleness defects are
+  all reported as Conflicting.

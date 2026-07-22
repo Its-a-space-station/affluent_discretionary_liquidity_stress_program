@@ -28,6 +28,30 @@ def _replace_release(
     return changed
 
 
+def _retime_inputs(
+    inputs: dict[str, PointInTimeResult],
+    assembly_date: str,
+) -> dict[str, PointInTimeResult]:
+    return {
+        series_id: PointInTimeResult(
+            tuple(
+                replace(
+                    value,
+                    release_date=assembly_date,
+                    available_from=assembly_date,
+                    available_through=assembly_date,
+                    retrieved_at=(
+                        f"{assembly_date}T12:00:00Z" if value.retrieved_at is not None else None
+                    ),
+                )
+                for value in result.values
+            ),
+            result.validation,
+        )
+        for series_id, result in inputs.items()
+    }
+
+
 def test_synthetic_april_2020_signs_and_structural_exclusions() -> None:
     assembly_date, inputs = load_fixture_inputs(include_visa=False)
     inputs["PSAVERT"] = PointInTimeResult((), ValidationResult())
@@ -130,7 +154,12 @@ def test_canonical_rejects_preliminary_umich_but_provisional_is_marked() -> None
     )
 
     canonical = assemble(assembly_date, inputs)
-    provisional = assemble(assembly_date, inputs, provisional=True)
+    provisional_date = "2020-06-26"
+    provisional = assemble(
+        provisional_date,
+        _retime_inputs(inputs, provisional_date),
+        provisional=True,
+    )
     canonical_umich = next(
         family for family in canonical.family_scores if family.family == "umich_top_tercile"
     )
@@ -143,6 +172,36 @@ def test_canonical_rejects_preliminary_umich_but_provisional_is_marked() -> None
         family for family in provisional.family_scores if family.family == "umich_top_tercile"
     ).abstained
     assert b'"assembly_mode":"provisional"' in serialize_assembly(provisional)
+
+
+def test_calendar_infers_mode_and_refuses_weekly_canonical_mislabel() -> None:
+    _, inputs = load_fixture_inputs(include_visa=True)
+    weekly_date = "2020-06-26"
+    weekly_inputs = _retime_inputs(inputs, weekly_date)
+
+    inferred = assemble(weekly_date, weekly_inputs)
+    attempted_override = assemble(weekly_date, weekly_inputs, provisional=False)
+
+    assert inferred.provisional
+    assert inferred.validation.ok
+    assert b'"assembly_mode":"provisional"' in serialize_assembly(inferred)
+    assert attempted_override.provisional
+    assert not attempted_override.validation.ok
+    assert any(
+        "does not match assembly calendar" in error
+        for error in attempted_override.validation.errors
+    )
+
+
+def test_unscheduled_assembly_date_is_invalid() -> None:
+    _, inputs = load_fixture_inputs(include_visa=True)
+    tuesday = "2020-06-23"
+
+    result = assemble(tuesday, _retime_inputs(inputs, tuesday))
+
+    assert result.provisional
+    assert not result.validation.ok
+    assert any("not a scheduled assembly date" in error for error in result.validation.errors)
 
 
 def test_archive_effective_availability_is_rechecked_at_engine_boundary() -> None:

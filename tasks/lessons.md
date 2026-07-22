@@ -40,6 +40,22 @@ the composite.
 
 ## Project-specific lessons
 
+### 2026-07-21 — Append-only requires replay validation and one locked transaction
+
+**Context:** Slice 4's first frozen-store writer refused a sequential duplicate,
+but concurrent callers could both validate an empty store and append the same
+month. Persisted vintage and source fields were trusted because the writer had
+validated them once.
+**Lesson:** Immutability is a read-time property as well as a write-time one.
+Validation, duplicate detection, append, and fsync must share one lock; every
+replay must recheck dates, source bytes/hash, redaction, family values, and
+composite arithmetic before a prior value can influence a new band. Calendar
+mode must also be inferred, not left to a caller-controlled default.
+**Apply:** Test simultaneous writers and independently corrupted canonical
+lines, including future observation metadata and malformed dates. Keep the
+source assembly embedded in canonical-safe form so a frozen line can prove its
+own internal consistency while git history supplies external tamper evidence.
+
 ### 2026-07-21 — A transformed licensed level can still be the raw level
 
 **Context:** Slice 3 initially serialized UMich's inverted level alongside its

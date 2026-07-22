@@ -73,7 +73,15 @@
       REVOLSL cache-vintage boundary, named April 2020 signs, all staleness
       thresholds, run-twice bytes, fixture generator, and pinned SHA are tested.
       Independent review findings repaired; 57/57 tests + ruff + mypy green.
-- [ ] Slice 4 — calendar, canonicalization, frozen store, bands (§2, §6).
+- [x] Slice 4 — calendar, canonicalization, frozen store, bands (§2, §6).
+      Complete 2026-07-21: bounded NYSE Friday/holiday assemblies, calendar-
+      inferred canonical/provisional mode, M+2/15 finalization, a locked
+      append-only frozen JSONL store with embedded canonical source/hash replay,
+      expanding Tier-A percentiles, 36-month burn-in, and two-month dwell.
+      Revision rewrites, concurrent duplicate appends, future vintages and
+      observations, malformed persisted dates, licensed-level leakage, and
+      threshold-rounding contradictions are regression-tested. Independent
+      review findings repaired; 79/79 tests + ruff + format + mypy green.
 - [ ] Slice 5 — independent checker (maker≠checker in code; seeded-defect tests).
 - [ ] Slice 6 — validation harness (§9+§14); then owner decision: seed frozen
       store from checker-Verified reconstruction?

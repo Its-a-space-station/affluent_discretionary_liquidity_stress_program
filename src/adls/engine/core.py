@@ -6,6 +6,7 @@ import math
 from collections.abc import Mapping, Sequence
 from datetime import UTC, date, datetime, timedelta
 
+from adls.calendarutil import canonical_month_for_assembly, is_assembly_date
 from adls.contracts import PointInTimeResult, PointInTimeValue, ValidationResult
 from adls.engine.models import AssemblyResult, FamilyScore, FreshnessResult
 from adls.engine.transforms import (
@@ -377,7 +378,7 @@ def assemble(
     assembly_date: str,
     inputs: Mapping[str, PointInTimeResult],
     *,
-    provisional: bool = False,
+    provisional: bool | None = None,
 ) -> AssemblyResult:
     """Compute one deterministic point-in-time assembly from Slice 2 snapshots."""
     validation = ValidationResult()
@@ -385,7 +386,7 @@ def assemble(
     if assembly is None:
         return AssemblyResult(
             assembly_date=assembly_date,
-            provisional=provisional,
+            provisional=bool(provisional),
             family_scores=(),
             tier_a_value=None,
             tier_b_value=None,
@@ -395,6 +396,21 @@ def assemble(
             flags=("invalid_assembly_date",),
             validation=validation,
         )
+
+    try:
+        if not is_assembly_date(assembly):
+            validation.error(f"{assembly_date} is not a scheduled assembly date")
+        calendar_provisional = canonical_month_for_assembly(assembly) is None
+    except ValueError as exc:
+        validation.error(str(exc))
+        calendar_provisional = True
+    if provisional is not None and provisional != calendar_provisional:
+        requested_mode = "provisional" if provisional else "canonical"
+        calendar_mode = "provisional" if calendar_provisional else "canonical"
+        validation.error(
+            f"requested {requested_mode} mode does not match assembly calendar ({calendar_mode})"
+        )
+    provisional = calendar_provisional
 
     expected_series = {spec.series_id for spec in ENGINE_SPECS}
     for series_id in sorted(set(inputs) - expected_series):

@@ -13,7 +13,7 @@ from fixtures.engine.gen_slice3_fixture import (
     load_fixture_inputs,
 )
 
-PINNED_ASSEMBLY_SHA256 = "9a455e9d13e77d405db37fad671b680dd93014d627164cfc6bb5d9ca96ab1438"
+PINNED_ASSEMBLY_SHA256 = "d568528a50258674a29a8b943680dfe71c76dad3462896ed8e88b93326a78dc8"
 
 
 def _golden_bytes() -> bytes:
