@@ -34,7 +34,9 @@
 - [~] Weekly as-of self-archive (owner-approved 2026-07-19; manual — see
       `data_archive/README.md`). Original ICI log used an obsolete 2025-named
       URL; correct 2026 provenance captured 2026-07-21 without overwriting the
-      evidence. FINRA/UMich/EGI/JPMC/BofA remain manual first-pass steps.
+      evidence. FINRA/EGI/JPMC/BofA remain manual first-pass steps. Next cycle
+      is due 2026-07-24 and includes a local report comparison against the
+      2026-07-17 artifact.
 - [x] Specify the deterministic composite stress measure — **v1.1 APPROVED
       2026-07-19** (`docs/composite_spec_v1.md`; all six decision points as
       written; checker-reviewed and rebuilt before approval).
@@ -116,7 +118,8 @@
       byte-deterministic, and leaves the live store empty. Live smoke also fixed
       the ALFRED completeness watermark for unchanged series; all nine are
       complete through 2026-07-22. 149 tests + ruff + touched format + mypy
-      green; SQLite integrity `ok`, zero overlaps.
+      green; SQLite integrity `ok`, zero overlaps. Owner review completed and
+      Slices 6 and 7 were committed and pushed as `0d95cec` on 2026-07-22.
 - [x] Visa SMI methodology confirmed (0-200 diffusion index, neutral 100) —
       §3.2 (100 − level) transform locked. (Resolved in planning, 2026-07-20.)
 - [x] Spec §14 v1.2 delta **approved 2026-07-19** (baseline floor, per-regime

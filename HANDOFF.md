@@ -21,7 +21,7 @@ reviewed, and pushed** (`8621898`) → **Slice 4 built, independently reviewed,
 repaired, and pushed** (`c4bb2e7`) → **Slice 5 built, reviewed, repaired, and
 pushed** (`7bd5f46`) → **Slice 6 built, real-data executed, and independently
 checker-Verified under its explicit historical-final assumption** → **Slice 7
-built, live-verified, and documented**. The
+built, live-verified, owner-reviewed, and pushed with Slice 6** (`0d95cec`). The
 pre-registered result is `coincident_monitor`: 2/4 episode hits, better than
 seasonal-naive and VAR but worse than AR(12), with non-monotonic calibration.
 The owner selected a cold live-store start; the first local weekly report is
@@ -164,13 +164,19 @@ complete and external publication remains gated.
 - `FRED_API_KEY` is in `.env` (git-ignored, owner-entered via hidden prompt;
   **never read or log it** — source it: `set -a; source .env; set +a`).
 
-## Immediate next step: owner review
+## Immediate next step: first operational weekly cycle
 
-1. Review the completed Slice 6 and Slice 7 worktree. Do not stage, commit, or
-   push until the owner explicitly approves those steps.
-2. Continue the manual Friday archive routine and local weekly report cadence.
-   Keep the historical reconstruction separate, preserve the cold-start
-   boundary, and leave scheduling and external publication gated.
+1. Phase 2 is complete. Slices 6 and 7 were owner-reviewed, committed, and
+   pushed to `origin/main` as `0d95cec`; there is no authorized Slice 8.
+2. On Friday 2026-07-24, run the manual archive routine, refresh ALFRED, advance
+   normalized archive coverage with provenance-bearing evidence, and generate
+   the local report using the 2026-07-17 report as the previous artifact.
+   Prioritize the decaying ICI window and the outstanding FINRA, EGI, JPMC, and
+   BofA first-pass captures.
+3. Keep the historical reconstruction separate, preserve the cold-start
+   boundary, and leave scheduling and external publication gated. After the
+   operational cycle, the next phase requires owner authorization; VD-001's
+   genuinely independent reconstruction is the recommended first priority.
 
 ## Deferred owner decisions (raise at the flagged moment, not before)
 
@@ -231,8 +237,8 @@ complete and external publication remains gated.
 ## The acid test
 
 You should be able to: read this + STATE + todo, `cd` here, run
-`.venv/bin/pytest -q` (expect 140 green), and repeat `adls validate` against the
+`.venv/bin/pytest -q` (expect 149 green), and repeat `adls validate` against the
 ignored normalized UMich archive with byte-identical outputs. The explicit
 assumption checker must return `Verified`; ordinary mode must return
-`Conflicting`. Slice 6 is complete. Do not seed the live store until the owner
-answers the now-due decision.
+`Conflicting`. Keep the live store cold; never promote the separate Slice 6
+frozen-equivalent validation artifact into live history.

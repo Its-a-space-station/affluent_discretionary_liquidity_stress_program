@@ -98,7 +98,8 @@ Loops produce findings and reports only — never actions.
 
 ## Last checkpoint
 
-- 2026-07-22 - Phase 2 Slice 7 complete. The owner selected a cold live-store
+- 2026-07-22 - Phase 2 Slices 6 and 7 were owner-reviewed, committed, and
+  pushed to `origin/main` as `0d95cec`. The owner selected a cold live-store
   start, and the live JSONL remains zero bytes. `adls report` now snapshots all
   local evidence, builds a calendar-derived canonical or provisional assembly,
   obtains an independent checker result, and emits deterministic redacted
@@ -197,7 +198,12 @@ Loops produce findings and reports only — never actions.
 
 ## Next recommended action
 
-- Owner review of the completed Slice 6 and Slice 7 worktree, followed by an
-  explicitly approved stage/commit/push. Operationally, continue the manual
-  Friday archive routine and local report cadence; scheduling and external
-  publication remain gated.
+- Phase 2 is complete; no Slice 8 is authorized. Run the first operational
+  weekly cycle on Friday 2026-07-24: capture the manual no-vintage sources,
+  refresh ALFRED, advance normalized archive coverage with provenance-bearing
+  evidence, and generate the local report using the 2026-07-17 report as its
+  previous artifact. Prioritize ICI plus the outstanding FINRA, EGI, JPMC, and
+  BofA first-pass captures.
+- Preserve the cold-start boundary and keep scheduling and external publication
+  gated. After the operational cycle, the recommended Phase 3 priority is an
+  owner-authorized, genuinely independent reconstruction to discharge VD-001.
