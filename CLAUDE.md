@@ -12,7 +12,7 @@ stress in affluent-household discretionary spending** (e.g., credit and deposit
 flows, luxury/discretionary sales, delinquency and drawdown behavior) and turns
 it into verified, labeled findings and reports usable as a **leading-indicator
 signal layer** for the wider research family. It informs a human; it never acts.
-Current phase: **Phase 2 implementation**. The exact authorized and gated scope
+Current phase: **Phase 3A verification and operational hardening**. The exact authorized and gated scope
 is recorded in `STATE.md`; do not infer broader operational authority from it.
 
 ## 2. Startup reading sequence
@@ -117,4 +117,6 @@ Explicit, in-context human approval is required before:
 - **Out of scope for now:** per-security recommendations (belongs to the
   screener projects), live scheduled loops, execution-capable paths,
   cross-system integrations, forecasting models, schema adoption, and external
-  publication. Additional providers require explicit approval.
+  publication. Additional providers require explicit approval. Phase 3A is
+  limited to verification and manual operational hardening; it does not widen
+  any provider, scheduling, publication, or action boundary.

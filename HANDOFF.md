@@ -21,7 +21,8 @@ reviewed, and pushed** (`8621898`) → **Slice 4 built, independently reviewed,
 repaired, and pushed** (`c4bb2e7`) → **Slice 5 built, reviewed, repaired, and
 pushed** (`7bd5f46`) → **Slice 6 built, real-data executed, and independently
 checker-Verified under its explicit historical-final assumption** → **Slice 7
-built, live-verified, owner-reviewed, and pushed with Slice 6** (`0d95cec`). The
+built, live-verified, owner-reviewed, and pushed with Slice 6** (`0d95cec`) →
+**Phase 3A authorized and the blind VD-001 coordinator package built**. The
 pre-registered result is `coincident_monitor`: 2/4 episode hits, better than
 seasonal-naive and VAR but worse than AR(12), with non-monotonic calibration.
 The owner selected a cold live-store start; the first local weekly report is
@@ -65,8 +66,12 @@ complete and external publication remains gated.
    an equal mean of independently detrended real-PCE component gaps, never a
    sum of chained-dollar levels. Baseline exact specs were owner-approved in
    item 5 on 2026-07-21, before the first real-data validation run.
+8. **Phase 3A authorization** (2026-07-22): verification and manual operational
+   hardening only. First priority is a blind VD-001 packet, candidate seal, and
+   exact post-submission comparator. Forecasting, scheduling, new providers,
+   schema adoption, publication, and cross-system feeds remain gated.
 
-## Where the code stands (Slices 1-7 complete)
+## Where the code stands (Slices 1-7 complete; Phase 3A underway)
 
 - `src/adls/`: config (only getenv site, never echoes), registry (Basket v1 as
   data, including WRMFNS +2-day canonical shift), contracts,
@@ -133,8 +138,17 @@ complete and external publication remains gated.
   keeps the `coincident_monitor`, non-monotonic calibration, open debt, cold
   history, and external-publication gate visible. See
   `docs/weekly_reporting.md`.
-- 149/149 unit + posture tests, ruff, explicit touched-file format check, and
-  mypy across 43 source files are green (`.venv`, Python 3.14).
+- `cleanroom/` is coordinator-only, stdlib-only Phase 3A tooling. It creates a
+  mode-restricted, exact-allowlist packet with one transactionally copied
+  SQLite snapshot and internal-use source evidence; validates a neutral Tier-A
+  155-month output contract; seals a candidate before reference disclosure;
+  and compares against one snapshotted checker-Verified reference without
+  echoing differing values. Posture tests bar implementation, network,
+  environment, and wall-clock imports. Exact matches remain open for owner
+  review rather than closing VD-001 automatically. See
+  `docs/clean_room_verification.md`.
+- 163/163 unit + posture tests, ruff, explicit touched-file format check, and
+  mypy across 47 source files are green (`.venv`, Python 3.14).
   (env-token confinement, requests confined to alfred/, forbidden-vocabulary
   scan with sort_order/ORDER BY exemptions, validation network/wall-clock
   confinement, no scheduler artifacts).
@@ -153,6 +167,12 @@ complete and external publication remains gated.
   256 obs back to 1992 — 10y z-windows fully powered, no fallback.
 - **Visa SMI methodology RESOLVED**: 0–200 diffusion index, neutral 100 →
   §3.2 `(100 − level)` transform locked.
+- **VD-001 PACKET READY, DEBT OPEN**: ignored local packet
+  `outputs/cleanroom_packet_2013-05_2026-03/` covers 155 months and verifies at
+  manifest SHA-256
+  `ed8ebc3ca3c7da9474708b64ac85a78d7fa65e872479f9e9f1a53ec48a4f531b`.
+  It contains no source code, tests, reference sequence, or validation output.
+  No independent candidate has been received or sealed.
 - Live fire found+fixed one real bug: network timeouts bypassed the retry
   loop (now retried; regression tests pin it, including that timeout
   exceptions never leak the keyed URL).
@@ -164,19 +184,22 @@ complete and external publication remains gated.
 - `FRED_API_KEY` is in `.env` (git-ignored, owner-entered via hidden prompt;
   **never read or log it** — source it: `set -a; source .env; set +a`).
 
-## Immediate next step: first operational weekly cycle
+## Immediate next steps: independent handoff and first weekly cycle
 
-1. Phase 2 is complete. Slices 6 and 7 were owner-reviewed, committed, and
-   pushed to `origin/main` as `0d95cec`; there is no authorized Slice 8.
+1. Identify a genuinely independent implementer who can work only from the
+   frozen packet and is authorized to handle its internal-use UMich evidence.
+   Keep the ADLS repository, reference sequence, validation artifact, and
+   comparison results hidden until the candidate is received and sealed.
 2. On Friday 2026-07-24, run the manual archive routine, refresh ALFRED, advance
    normalized archive coverage with provenance-bearing evidence, and generate
    the local report using the 2026-07-17 report as the previous artifact.
    Prioritize the decaying ICI window and the outstanding FINRA, EGI, JPMC, and
    BofA first-pass captures.
-3. Keep the historical reconstruction separate, preserve the cold-start
-   boundary, and leave scheduling and external publication gated. After the
-   operational cycle, the next phase requires owner authorization; VD-001's
-   genuinely independent reconstruction is the recommended first priority.
+3. After a candidate arrives, run `adls cleanroom-seal` before any reference
+   disclosure, then `adls cleanroom-compare`. Keep VD-001 open until the owner
+   reviews implementer independence and either accepts the exact match or
+   adjudicates every difference. Preserve the cold-start boundary and leave
+   scheduling and external publication gated.
 
 ## Deferred owner decisions (raise at the flagged moment, not before)
 
@@ -237,7 +260,7 @@ complete and external publication remains gated.
 ## The acid test
 
 You should be able to: read this + STATE + todo, `cd` here, run
-`.venv/bin/pytest -q` (expect 149 green), and repeat `adls validate` against the
+`.venv/bin/pytest -q` (expect 163 green), and repeat `adls validate` against the
 ignored normalized UMich archive with byte-identical outputs. The explicit
 assumption checker must return `Verified`; ordinary mode must return
 `Conflicting`. Keep the live store cold; never promote the separate Slice 6

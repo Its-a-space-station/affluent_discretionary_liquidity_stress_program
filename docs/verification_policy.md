@@ -65,13 +65,19 @@ A reviewer must be able to retrace the path from raw observation to finding.
   debt**, not dropped — so coverage gaps stay visible.
 - A `Conflicting` finding is escalated to a human, never auto-resolved.
 
-## 7. Verification in Phase 2
+## 7. Verification in Phase 2 and Phase 3A
 
 Verification now covers code, point-in-time data behavior, deterministic
 artifacts, and documentation consistency. Every implementation slice requires
 focused regression tests plus the repository posture, lint, and type checks;
 real-data smoke checks must record coverage and provenance without exposing
 credentials.
+
+Phase 3A adds a blind two-implementer acceptance protocol. Coordinator tooling
+may freeze and hash a spec-only evidence packet, seal an independently produced
+candidate before reference disclosure, and compare value-free paths afterward.
+It may not produce the candidate, attest to independence, reveal the reference
+early, or close verification debt without human review.
 
 ## 8. Playbook v2 additions
 

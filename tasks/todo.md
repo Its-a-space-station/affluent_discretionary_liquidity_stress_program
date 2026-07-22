@@ -144,6 +144,22 @@
 - [ ] `needs_human_review` escalation path for regime-break signals via the
       `manual_review` template.
 
+## Phase 3A - verification and operational hardening
+
+- [x] VD-001 clean-room coordinator package: create a spec-only local packet with frozen
+      evidence hashes, a neutral Tier-A output contract, a pre-disclosure
+      submission seal, and an exact coordinator-side comparison report. The
+      packet must contain no reference sequence, source code, or tests and does
+      not itself count as the independent implementation. Complete 2026-07-22:
+      the ignored 155-month packet verifies at manifest SHA-256 `ed8ebc3c...f531b`;
+      163 tests + ruff + touched format + mypy across 47 source files are green.
+- [ ] Obtain a sealed reconstruction from a genuinely independent implementer
+      who worked only from the approved packet; compare only after sealing.
+- [ ] Human-review an exact match or adjudicate every discrepancy and add
+      regression evidence before considering VD-001 for closure.
+- [ ] Harden the existing manual archive/report workflow without adding a
+      scheduler, provider adapter, publication path, or cross-system feed.
+
 ## Calibration & validation (after MVP definition)
 
 - [ ] Historical validation protocol on vintage data (no revised-series

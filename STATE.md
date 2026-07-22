@@ -1,23 +1,26 @@
 # STATE.md — ADLS (Affluent Discretionary Liquidity Stress Program)
 
 *Last updated: 2026-07-22.* **New session? Read `HANDOFF.md` first** - the
-full narrative of how this repo completed all seven Phase 2 slices.
+full narrative of how this repo completed all seven Phase 2 slices and entered
+Phase 3A.
 
 ## Phase
 
-**Phase 2 — Implementation (authorized 2026-07-20 via approved plan).** The
-bootstrap scope guard is lifted for exactly this scope: read-only FRED/ALFRED
-adapter with durable vintage cache, deterministic composite engine (spec
-§1–§7), §9/§14 validation harness, weekly report generator — built in seven
-verified slices. Still gated: schedulers/launchd, any execution path,
-forecasting models, schema adoption, external publication.
+**Phase 3A - Verification and operational hardening (authorized 2026-07-22).**
+The seven Phase 2 implementation slices are complete. Phase 3A is limited to a
+blind VD-001 clean-room handoff and exact comparison harness, plus hardening of
+the existing manual archive/report workflow. Still gated: schedulers/launchd,
+new provider adapters, any execution path, forecasting models, schema adoption,
+cross-system feeds, and external publication.
 
 ## Current MVP scope
 
 - In scope: the approved read-only FRED/ALFRED adapter and durable vintage
   cache; a uniform local-archive/PIT input layer; the deterministic composite
   engine in spec §1-§7; the §9/§14 validation harness; and a local weekly
-  research-report generator.
+  research-report generator. Phase 3A adds coordinator-only clean-room packet,
+  submission-seal, and post-submission comparison tooling for VD-001, plus
+  manual operational hardening.
 - Explicitly deferred: any scheduled loop, new provider, forecasting model,
   schema adoption, external publication, cross-system signal feed, or anything
   execution-capable unless separately approved.
@@ -42,6 +45,10 @@ forecasting models, schema adoption, external publication.
   `canonical/frozen_sequence.jsonl` remains intentionally empty; the Slice 6
   frozen-equivalent reconstruction remains validation evidence under
   `outputs/` and is not promoted into live history.
+- 2026-07-22 - Owner authorized narrow Phase 3A verification and operational
+  hardening. The first priority is a blind, spec-only VD-001 clean-room packet
+  and exact post-submission comparison harness. Preparing the packet does not
+  constitute the second implementation and cannot itself close VD-001.
 - 2026-07-19 — Owner approved the CLAUDE.md §10 operating fields: providers
   (read-only public macro/credit series incl. FRED/ALFRED vintages, retail &
   luxury sales releases, deposit-flow data), deterministic composite criteria,
@@ -88,16 +95,32 @@ Loops produce findings and reports only — never actions.
 
 | Loop | Cadence | Bounds / stop conditions | Status |
 | --- | --- | --- | --- |
-| (none) | — | — | Scheduling remains gated in Phase 2 |
+| (none) | — | — | Scheduling remains gated in Phase 3A |
 
 ## Blockers
 
 - Canonical schema enums (`object_type`, `project`) do not include
   `macro_indicator` / `adls` — playbook-side extension needs owner approval
   before schema adoption can be checked off.
+- VD-001 requires a genuinely independent implementer. The local packet and
+  comparator cannot satisfy that independence criterion by themselves.
 
 ## Last checkpoint
 
+- 2026-07-22 - Phase 3A clean-room coordinator slice complete. The stdlib-only
+  `cleanroom/` package and three manual CLI commands prepare a reference-free
+  packet, seal a canonical candidate before disclosure, and compare it against
+  one snapshotted checker-Verified reference. The neutral contract covers all
+  three Tier-A family states, five input vintages, Tier-A value, the historical
+  UMich assumption, and complete band/dwell state for 2013-05 through 2026-03.
+  Tampered packets/submissions, extra files, relaxed permissions, path leakage,
+  noncanonical JSONL, malformed decimals, impossible timestamp ordering, and
+  unverified references fail closed. Difference reports contain paths but no
+  differing values, and no result changes debt automatically. The real ignored
+  32 MB packet verifies across 155 months at manifest SHA-256
+  `ed8ebc3ca3c7da9474708b64ac85a78d7fa65e872479f9e9f1a53ec48a4f531b`;
+  no independent candidate exists yet, so VD-001 remains open. Verification:
+  163 tests, ruff, touched-file format check, and mypy across 47 source files.
 - 2026-07-22 - Phase 2 Slices 6 and 7 were owner-reviewed, committed, and
   pushed to `origin/main` as `0d95cec`. The owner selected a cold live-store
   start, and the live JSONL remains zero bytes. `adls report` now snapshots all
@@ -198,12 +221,16 @@ Loops produce findings and reports only — never actions.
 
 ## Next recommended action
 
-- Phase 2 is complete; no Slice 8 is authorized. Run the first operational
-  weekly cycle on Friday 2026-07-24: capture the manual no-vintage sources,
+- Keep the reference and implementation repository hidden while an authorized,
+  genuinely independent implementer works only from the frozen clean-room
+  packet. Seal the returned candidate before running the comparison; VD-001
+  remains open until owner review even after an exact technical match.
+- Run the first operational weekly cycle on Friday 2026-07-24: capture the
+  manual no-vintage sources,
   refresh ALFRED, advance normalized archive coverage with provenance-bearing
   evidence, and generate the local report using the 2026-07-17 report as its
   previous artifact. Prioritize ICI plus the outstanding FINRA, EGI, JPMC, and
   BofA first-pass captures.
-- Preserve the cold-start boundary and keep scheduling and external publication
-  gated. After the operational cycle, the recommended Phase 3 priority is an
-  owner-authorized, genuinely independent reconstruction to discharge VD-001.
+- Preserve the cold-start boundary and keep scheduling, new providers,
+  forecasting, schema adoption, cross-system feeds, and external publication
+  gated.

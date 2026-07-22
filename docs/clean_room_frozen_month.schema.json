@@ -1,0 +1,105 @@
+{
+  "$id": "urn:adls:cleanroom:frozen-month:v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "band": {"$ref": "#/$defs/band"},
+    "families": {"$ref": "#/$defs/families"},
+    "finalized_on": {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "type": "string"},
+    "historical_umich_final_assumption": {"type": "boolean"},
+    "input_vintages": {"$ref": "#/$defs/input_vintages"},
+    "month": {"pattern": "^[0-9]{4}-[0-9]{2}$", "type": "string"},
+    "schema_version": {"const": "adls.cleanroom.frozen-month.v1"},
+    "tier_a_abstained": {"type": "boolean"},
+    "tier_a_value": {"type": ["number", "null"]}
+  },
+  "required": [
+    "band",
+    "families",
+    "finalized_on",
+    "historical_umich_final_assumption",
+    "input_vintages",
+    "month",
+    "schema_version",
+    "tier_a_abstained",
+    "tier_a_value"
+  ],
+  "title": "ADLS clean-room frozen Tier-A month",
+  "type": "object",
+  "$defs": {
+    "band": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_band": {"$ref": "#/$defs/nullable_band_name"},
+        "candidate_count": {"minimum": 0, "type": "integer"},
+        "confirmed_band": {"$ref": "#/$defs/nullable_band_name"},
+        "eligible": {"type": "boolean"},
+        "published_band": {"$ref": "#/$defs/nullable_band_name"},
+        "raw_band": {"$ref": "#/$defs/nullable_band_name"},
+        "reference_count": {"minimum": 0, "type": "integer"},
+        "thresholds": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/thresholds"}
+          ]
+        }
+      },
+      "required": [
+        "candidate_band",
+        "candidate_count",
+        "confirmed_band",
+        "eligible",
+        "published_band",
+        "raw_band",
+        "reference_count",
+        "thresholds"
+      ],
+      "type": "object"
+    },
+    "families": {
+      "additionalProperties": false,
+      "properties": {
+        "census_retail": {"$ref": "#/$defs/family_state"},
+        "household_liquidity": {"$ref": "#/$defs/family_state"},
+        "umich_top_tercile": {"$ref": "#/$defs/family_state"}
+      },
+      "required": ["census_retail", "household_liquidity", "umich_top_tercile"],
+      "type": "object"
+    },
+    "family_state": {
+      "additionalProperties": false,
+      "properties": {
+        "abstained": {"type": "boolean"},
+        "flags": {"items": {"type": "string"}, "type": "array"},
+        "z_score": {"type": ["number", "null"]}
+      },
+      "required": ["abstained", "flags", "z_score"],
+      "type": "object"
+    },
+    "input_vintages": {
+      "additionalProperties": false,
+      "properties": {
+        "DPSACBW027SBOG": {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "type": "string"},
+        "RSFHFS": {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "type": "string"},
+        "RSFSDP": {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "type": "string"},
+        "UMICH_SCA_T2N_TOP": {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "type": "string"},
+        "WRMFNS": {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "type": "string"}
+      },
+      "required": ["DPSACBW027SBOG", "RSFHFS", "RSFSDP", "UMICH_SCA_T2N_TOP", "WRMFNS"],
+      "type": "object"
+    },
+    "nullable_band_name": {
+      "enum": ["Normal", "Watch", "Elevated", "High", null]
+    },
+    "thresholds": {
+      "additionalProperties": false,
+      "properties": {
+        "p70": {"type": "number"},
+        "p85": {"type": "number"},
+        "p95": {"type": "number"}
+      },
+      "required": ["p70", "p85", "p95"],
+      "type": "object"
+    }
+  }
+}

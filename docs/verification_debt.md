@@ -16,19 +16,27 @@ discharge criteria are met and reviewed by a human.
   percentiles, and dwell state without importing maker, input, ALFRED,
   registry, contracts, or calendar implementations. Seeded ddof, percentile,
   dwell, PIT-boundary, and staleness defects each produce `Conflicting`.
+  Phase 3A adds a blind protocol, neutral Tier-A output contract, immutable
+  evidence manifest, pre-disclosure candidate seal, and value-free exact
+  comparator. The ignored 2013-05 through 2026-03 packet verifies at manifest
+  SHA-256 `ed8ebc3ca3c7da9474708b64ac85a78d7fa65e872479f9e9f1a53ec48a4f531b`.
 - **Gap:** The maker and checker are separate code paths but were developed in
   the same repository during one implementation effort. This does not satisfy
-  §12's requirement for two independent implementers. The live frozen store
-  also remains intentionally empty pending the post-Slice-6 owner decision.
+  §12's requirement for two independent implementers. Preparing the packet and
+  comparator is coordinator work, not a second implementation. No independent
+  candidate has been received or sealed. The live frozen store remains
+  intentionally empty under the owner-approved cold start.
 - **Consequence:** A checker `Verified` result establishes deterministic local
   source-to-sequence agreement under `adls.checker.v1`; it must not be described
   as satisfying the full §12 acceptance criterion or as authorizing external
   publication.
 - **Discharge:** A second implementer, working from the approved spec and raw
   source artifacts rather than this implementation, reconstructs the full
-  2013-present frozen-equivalent sequence and bands. Both outputs match exactly
-  or every difference is adjudicated and regression-tested before the owner
-  decides whether to seed the live frozen store.
+  2013-present frozen-equivalent Tier-A sequence and bands. The candidate is
+  sealed before reference disclosure, then exactly matches the neutral
+  canonical projection or every difference is adjudicated and regression-tested.
+  The owner separately confirms implementer independence before closing the
+  debt; no tool changes the status automatically.
 
 ## VD-002 — Historical UMich final-release reconstruction
 

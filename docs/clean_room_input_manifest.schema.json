@@ -1,0 +1,94 @@
+{
+  "$id": "urn:adls:cleanroom:input-manifest:v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "controls": {
+      "additionalProperties": false,
+      "properties": {
+        "contains_adls_source_or_tests": {"const": false},
+        "contains_reference_output": {"const": false},
+        "historical_umich_assumption": {"const": "unrevised_final_values"},
+        "licensed_evidence_must_remain_internal": {"const": true},
+        "reference_withheld_until_submission_sealed": {"const": true}
+      },
+      "required": [
+        "contains_adls_source_or_tests",
+        "contains_reference_output",
+        "historical_umich_assumption",
+        "licensed_evidence_must_remain_internal",
+        "reference_withheld_until_submission_sealed"
+      ],
+      "type": "object"
+    },
+    "evidence": {
+      "items": {"$ref": "#/$defs/file_descriptor"},
+      "minItems": 4,
+      "type": "array"
+    },
+    "generated_at": {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$", "type": "string"},
+    "output_contract": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {"const": "clean_room_frozen_month_contract"},
+        "schema_version": {"const": "adls.cleanroom.frozen-month.v1"},
+        "sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"}
+      },
+      "required": ["artifact_id", "schema_version", "sha256"],
+      "type": "object"
+    },
+    "protocol_version": {"const": "adls.cleanroom.protocol.v1"},
+    "reconstruction_window": {
+      "additionalProperties": false,
+      "properties": {
+        "end_month": {"pattern": "^[0-9]{4}-[0-9]{2}$", "type": "string"},
+        "expected_month_count": {"minimum": 1, "type": "integer"},
+        "start_month": {"pattern": "^[0-9]{4}-[0-9]{2}$", "type": "string"}
+      },
+      "required": ["end_month", "expected_month_count", "start_month"],
+      "type": "object"
+    },
+    "schema_version": {"const": "adls.cleanroom.input-manifest.v1"},
+    "specifications": {
+      "items": {"$ref": "#/$defs/file_descriptor"},
+      "minItems": 6,
+      "type": "array"
+    }
+  },
+  "required": [
+    "controls",
+    "evidence",
+    "generated_at",
+    "output_contract",
+    "protocol_version",
+    "reconstruction_window",
+    "schema_version",
+    "specifications"
+  ],
+  "title": "ADLS clean-room frozen input manifest",
+  "type": "object",
+  "$defs": {
+    "file_descriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {"pattern": "^[a-z0-9_]+$", "type": "string"},
+        "byte_count": {"minimum": 1, "type": "integer"},
+        "classification": {
+          "enum": ["public_specification", "internal_research_evidence", "internal_use_only"]
+        },
+        "media_type": {"minLength": 1, "type": "string"},
+        "packet_path": {"pattern": "^(spec|evidence)/[^/].+$", "type": "string"},
+        "sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"}
+      },
+      "required": [
+        "artifact_id",
+        "byte_count",
+        "classification",
+        "media_type",
+        "packet_path",
+        "sha256"
+      ],
+      "type": "object"
+    }
+  }
+}

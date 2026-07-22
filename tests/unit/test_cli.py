@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -270,3 +271,110 @@ def test_report_cli_uses_local_defaults_and_explicit_timestamp(
     assert captured["report_artifact_path"].name == "weekly_report_2026-07-17.json"
     assert captured["markdown_path"].name == "weekly_report_2026-07-17.md"
     assert "weekly report markdown" in capsys.readouterr().out
+
+
+def test_cleanroom_prepare_cli_routes_explicit_frozen_inputs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    captured: dict[str, Any] = {}
+
+    def fake_prepare(sources: Any, output_dir: Path, **kwargs: Any) -> Any:
+        captured.update({"sources": sources, "output_dir": output_dir, **kwargs})
+        return SimpleNamespace(
+            packet_path=output_dir,
+            manifest_path=output_dir / "INPUT_MANIFEST.json",
+            manifest_sha256="a" * 64,
+        )
+
+    monkeypatch.setattr("adls.cleanroom.prepare_packet", fake_prepare)
+    result = main(
+        [
+            "cleanroom-prepare",
+            "--cache",
+            str(tmp_path / "cache.sqlite"),
+            "--umich-workbook",
+            str(tmp_path / "umich.xls"),
+            "--umich-release-calendar",
+            str(tmp_path / "calendar.pdf"),
+            "--archive-log",
+            str(tmp_path / "ARCHIVE_LOG.md"),
+            "--start-month",
+            "2013-05",
+            "--end-month",
+            "2026-03",
+            "--generated-at",
+            "2026-07-22T15:00:00Z",
+            "--output-dir",
+            str(tmp_path / "packet"),
+        ]
+    )
+
+    assert result == 0
+    assert captured["start_month"] == "2013-05"
+    assert captured["end_month"] == "2026-03"
+    assert captured["sources"].cache_path == tmp_path / "cache.sqlite"
+    assert "input manifest sha256" in capsys.readouterr().out
+
+
+def test_cleanroom_seal_and_compare_cli_preserve_manual_gates(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    sealed: dict[str, Any] = {}
+
+    def fake_seal(**kwargs: Any) -> Any:
+        sealed.update(kwargs)
+        return SimpleNamespace(artifact_path=kwargs["artifact_path"], sha256="b" * 64)
+
+    def fake_compare(**kwargs: Any) -> Any:
+        return SimpleNamespace(
+            artifact_path=kwargs["artifact_path"],
+            verdict="different",
+            exact_match=False,
+        )
+
+    monkeypatch.setattr("adls.cleanroom.seal_submission", fake_seal)
+    monkeypatch.setattr("adls.cleanroom.compare_submission", fake_compare)
+    seal_result = main(
+        [
+            "cleanroom-seal",
+            "--input-manifest",
+            str(tmp_path / "manifest.json"),
+            "--candidate",
+            str(tmp_path / "candidate.jsonl"),
+            "--implementation-id",
+            "independent-v1",
+            "--generated-at",
+            "2026-07-22T16:00:00Z",
+            "--attest-clean-room",
+            "--artifact",
+            str(tmp_path / "submission.json"),
+        ]
+    )
+    compare_result = main(
+        [
+            "cleanroom-compare",
+            "--reference",
+            str(tmp_path / "reference.jsonl"),
+            "--validation-artifact",
+            str(tmp_path / "validation.json"),
+            "--input-manifest",
+            str(tmp_path / "manifest.json"),
+            "--candidate",
+            str(tmp_path / "candidate.jsonl"),
+            "--submission",
+            str(tmp_path / "submission.json"),
+            "--generated-at",
+            "2026-07-22T17:00:00Z",
+            "--artifact",
+            str(tmp_path / "comparison.json"),
+        ]
+    )
+
+    assert seal_result == 0
+    assert sealed["attest_clean_room"] is True
+    assert compare_result == 1
+    assert "comparison verdict: different" in capsys.readouterr().out

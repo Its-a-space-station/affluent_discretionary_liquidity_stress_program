@@ -153,6 +153,20 @@ mark coverage through that cutoff only after both succeed, reject responses
 beyond it, and regression-test an unchanged series whose last change predates
 the requested point-in-time date.
 
+## A blind acceptance test needs a seal before comparison
+
+**Context:** VD-001 requires a second implementer, but the existing reference
+sequence, maker, checker, and tests all live in the same repository. Sharing the
+repository or expected monthly values would turn reconstruction into imitation.
+**Lesson:** Independence is a process property, not another code path. Freeze an
+exact allowlist of spec/evidence files, omit all reference material, bind the
+candidate hash to the input-manifest hash before disclosure, and compare from
+one snapshot. Difference reports should identify paths without echoing values.
+**Apply:** Exact technical agreement only makes the debt eligible for owner
+review. The coordinator cannot write the candidate or automatically close the
+debt, and packet verification must reject extra files, relaxed permissions,
+path leakage, mutation, and impossible event ordering.
+
 ## Repeated mistakes to avoid
 
 - Signing a series from intuition without named-episode walkthroughs.

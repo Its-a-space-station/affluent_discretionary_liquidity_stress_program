@@ -3,6 +3,9 @@
 adls fetch [--series ID ...]   backfill vintage cache from ALFRED (read-only)
 adls validate                  run the local cache-only validation harness
 adls report                    generate a local weekly research report
+adls cleanroom-prepare         freeze a reference-free VD-001 evidence packet
+adls cleanroom-seal            seal an independent candidate before disclosure
+adls cleanroom-compare         compare a sealed candidate after disclosure
 """
 
 from __future__ import annotations
@@ -294,6 +297,86 @@ def _cmd_report(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_cleanroom_prepare(args: argparse.Namespace) -> int:
+    from pathlib import Path
+
+    from adls.cleanroom import CleanRoomError, PacketSources, prepare_packet
+
+    sources = PacketSources(
+        cache_path=Path(args.cache),
+        umich_workbook_path=Path(args.umich_workbook),
+        umich_release_calendar_path=Path(args.umich_release_calendar),
+        archive_log_path=Path(args.archive_log),
+        indicator_basket_path=Path(args.indicator_basket),
+        composite_spec_path=Path(args.composite_spec),
+        spec_errata_path=Path(args.spec_errata),
+        protocol_path=Path(args.protocol),
+        frozen_month_contract_path=Path(args.frozen_month_contract),
+        input_manifest_contract_path=Path(args.input_manifest_contract),
+        submission_contract_path=Path(args.submission_contract),
+    )
+    try:
+        result = prepare_packet(
+            sources,
+            Path(args.output_dir),
+            start_month=args.start_month,
+            end_month=args.end_month,
+            generated_at=args.generated_at,
+        )
+    except (CleanRoomError, OSError) as exc:
+        print(f"ERROR {exc}", file=sys.stderr)
+        return 1
+    print(f"clean-room packet: {result.packet_path}")
+    print(f"input manifest: {result.manifest_path}")
+    print(f"input manifest sha256: {result.manifest_sha256}")
+    return 0
+
+
+def _cmd_cleanroom_seal(args: argparse.Namespace) -> int:
+    from pathlib import Path
+
+    from adls.cleanroom import CleanRoomError, seal_submission
+
+    try:
+        result = seal_submission(
+            input_manifest_path=Path(args.input_manifest),
+            candidate_path=Path(args.candidate),
+            implementation_id=args.implementation_id,
+            generated_at=args.generated_at,
+            artifact_path=Path(args.artifact),
+            attest_clean_room=args.attest_clean_room,
+        )
+    except (CleanRoomError, OSError) as exc:
+        print(f"ERROR {exc}", file=sys.stderr)
+        return 1
+    print(f"sealed submission: {result.artifact_path}")
+    print(f"sealed submission sha256: {result.sha256}")
+    return 0
+
+
+def _cmd_cleanroom_compare(args: argparse.Namespace) -> int:
+    from pathlib import Path
+
+    from adls.cleanroom import CleanRoomError, compare_submission
+
+    try:
+        result = compare_submission(
+            reference_path=Path(args.reference),
+            validation_artifact_path=Path(args.validation_artifact),
+            input_manifest_path=Path(args.input_manifest),
+            candidate_path=Path(args.candidate),
+            submission_path=Path(args.submission),
+            generated_at=args.generated_at,
+            artifact_path=Path(args.artifact),
+        )
+    except (CleanRoomError, OSError) as exc:
+        print(f"ERROR {exc}", file=sys.stderr)
+        return 2
+    print(f"clean-room comparison: {result.artifact_path}")
+    print(f"comparison verdict: {result.verdict}")
+    return 0 if result.exact_match else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="adls",
@@ -363,6 +446,105 @@ def main(argv: list[str] | None = None) -> int:
     report.add_argument("--artifact", default=None, help="canonical report artifact path")
     report.add_argument("--markdown", default=None, help="human-readable report path")
     report.set_defaults(func=_cmd_report)
+
+    cleanroom_prepare = sub.add_parser(
+        "cleanroom-prepare",
+        help="freeze a local reference-free VD-001 clean-room packet",
+    )
+    cleanroom_prepare.add_argument("--cache", required=True, help="ALFRED SQLite cache")
+    cleanroom_prepare.add_argument(
+        "--umich-workbook",
+        required=True,
+        help="provider-authored historical Table 2n workbook",
+    )
+    cleanroom_prepare.add_argument(
+        "--umich-release-calendar",
+        required=True,
+        help="provider-authored UMich release calendar PDF",
+    )
+    cleanroom_prepare.add_argument(
+        "--archive-log",
+        required=True,
+        help="retrieval-day ARCHIVE_LOG.md",
+    )
+    cleanroom_prepare.add_argument("--start-month", required=True, help="first YYYY-MM")
+    cleanroom_prepare.add_argument("--end-month", required=True, help="last YYYY-MM")
+    cleanroom_prepare.add_argument(
+        "--generated-at",
+        required=True,
+        help="explicit canonical UTC packet timestamp",
+    )
+    cleanroom_prepare.add_argument(
+        "--output-dir",
+        required=True,
+        help="new ignored local packet directory",
+    )
+    cleanroom_prepare.add_argument(
+        "--indicator-basket",
+        default="docs/indicator_basket_proposal.md",
+        help=argparse.SUPPRESS,
+    )
+    cleanroom_prepare.add_argument(
+        "--composite-spec",
+        default="docs/composite_spec_v1.md",
+        help=argparse.SUPPRESS,
+    )
+    cleanroom_prepare.add_argument(
+        "--spec-errata",
+        default="canonical/spec_errata.md",
+        help=argparse.SUPPRESS,
+    )
+    cleanroom_prepare.add_argument(
+        "--protocol",
+        default="docs/clean_room_verification.md",
+        help=argparse.SUPPRESS,
+    )
+    cleanroom_prepare.add_argument(
+        "--frozen-month-contract",
+        default="docs/clean_room_frozen_month.schema.json",
+        help=argparse.SUPPRESS,
+    )
+    cleanroom_prepare.add_argument(
+        "--input-manifest-contract",
+        default="docs/clean_room_input_manifest.schema.json",
+        help=argparse.SUPPRESS,
+    )
+    cleanroom_prepare.add_argument(
+        "--submission-contract",
+        default="docs/clean_room_submission.schema.json",
+        help=argparse.SUPPRESS,
+    )
+    cleanroom_prepare.set_defaults(func=_cmd_cleanroom_prepare)
+
+    cleanroom_seal = sub.add_parser(
+        "cleanroom-seal",
+        help="seal an independent candidate before reference disclosure",
+    )
+    cleanroom_seal.add_argument("--input-manifest", required=True)
+    cleanroom_seal.add_argument("--candidate", required=True)
+    cleanroom_seal.add_argument("--implementation-id", required=True)
+    cleanroom_seal.add_argument("--generated-at", required=True)
+    cleanroom_seal.add_argument("--artifact", required=True)
+    cleanroom_seal.add_argument(
+        "--attest-clean-room",
+        action="store_true",
+        required=True,
+        help="attest packet-only implementation before sealing",
+    )
+    cleanroom_seal.set_defaults(func=_cmd_cleanroom_seal)
+
+    cleanroom_compare = sub.add_parser(
+        "cleanroom-compare",
+        help="compare a sealed candidate after reference disclosure",
+    )
+    cleanroom_compare.add_argument("--reference", required=True)
+    cleanroom_compare.add_argument("--validation-artifact", required=True)
+    cleanroom_compare.add_argument("--input-manifest", required=True)
+    cleanroom_compare.add_argument("--candidate", required=True)
+    cleanroom_compare.add_argument("--submission", required=True)
+    cleanroom_compare.add_argument("--generated-at", required=True)
+    cleanroom_compare.add_argument("--artifact", required=True)
+    cleanroom_compare.set_defaults(func=_cmd_cleanroom_compare)
 
     args = parser.parse_args(argv)
     return int(args.func(args))
