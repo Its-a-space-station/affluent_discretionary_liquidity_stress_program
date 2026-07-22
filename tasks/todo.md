@@ -94,9 +94,29 @@
       typing, snapshot, and posture repairs. The same-repo/two-implementer gap is
       open as `docs/verification_debt.md` VD-001. 109/109 tests + ruff + touched-
       file format check + mypy green.
-- [ ] Slice 6 — validation harness (§9+§14); then owner decision: seed frozen
-      store from checker-Verified reconstruction?
-- [ ] Slice 7 — weekly report + launch-condition audit.
+- [x] Slice 6 — validation harness (§9+§14). Complete 2026-07-21: the official
+      internal-use UMich Table 2n workbook and provider final-release calendar
+      were archived and normalized locally; the approved 2013-05 through
+      2026-03 real run is byte-deterministic and checker-`Verified` (310/310)
+      only in the explicit historical-final assumption mode. The primary hit
+      2/4 episodes and beat seasonal-naive and VAR but not AR(12), so the
+      pre-registered failure clause honestly returns `coincident_monitor`;
+      calibration is non-monotonic and all inference remains descriptive.
+      Licensed levels remain ignored/redacted. VD-001, VD-002, and VD-004 stay
+      open. Owner selected a cold live-store start on 2026-07-22; the separate
+      frozen-equivalent validation artifact is not live history.
+- [x] Slice 7 - weekly report + launch-condition audit. Complete 2026-07-22:
+      `adls report` snapshots all local evidence, emits exact redacted assembly
+      JSON plus canonical JSON/Markdown reports, and pairs every finding with
+      approved result/confidence labels, evidence IDs, and timestamps. The
+      independent checker handles canonical and provisional weekly assemblies;
+      cold-start/live-band state, binding `coincident_monitor` framing,
+      calibration, debt, provider health, and publication gates remain visible.
+      The first 2026-07-17 report is checker-`Verified` for its current assembly,
+      byte-deterministic, and leaves the live store empty. Live smoke also fixed
+      the ALFRED completeness watermark for unchanged series; all nine are
+      complete through 2026-07-22. 149 tests + ruff + touched format + mypy
+      green; SQLite integrity `ok`, zero overlaps.
 - [x] Visa SMI methodology confirmed (0-200 diffusion index, neutral 100) —
       §3.2 (100 − level) transform locked. (Resolved in planning, 2026-07-20.)
 - [x] Spec §14 v1.2 delta **approved 2026-07-19** (baseline floor, per-regime
@@ -115,8 +135,9 @@
 
 ## Reports
 
-- [ ] Weekly research report from the playbook `weekly_report` template
-      (research-only warning + safety footer).
+- [x] Weekly local research report implemented in Slice 7 with the required
+      research-only warning, evidence-bearing sections, launch audit, and safety
+      footer. External publication remains gated.
 - [ ] `needs_human_review` escalation path for regime-break signals via the
       `manual_review` template.
 

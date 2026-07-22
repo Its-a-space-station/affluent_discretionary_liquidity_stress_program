@@ -18,6 +18,7 @@ from adls.engine.transforms import (
 from adls.registry import LEADING_FAMILIES, REGISTRY, SeriesSpec
 
 FAMILY_SEQUENCE: tuple[str, ...] = (*LEADING_FAMILIES, "strain")
+HISTORICAL_FINAL_ASSUMPTION = "umich_unrevised_final"
 ENGINE_SPECS: tuple[SeriesSpec, ...] = tuple(
     spec for spec in REGISTRY if spec.role in {"leading", "overlay"}
 )
@@ -134,6 +135,16 @@ def _validate_snapshot(
                 f"{spec.series_id} available_from {available_from.isoformat()} precedes release "
                 f"{release.isoformat()}"
             )
+        historical_final_assumption = value.availability_basis == HISTORICAL_FINAL_ASSUMPTION
+        historical_final_allowed = (
+            spec.source == "archive" and spec.series_id == "UMICH_SCA_T2N_TOP"
+        )
+        if value.availability_basis != "observed" and not (
+            historical_final_assumption and historical_final_allowed
+        ):
+            validation.error(
+                f"{spec.series_id} cannot use availability basis {value.availability_basis!r}"
+            )
         if spec.source == "archive":
             if value.release_stage is None:
                 validation.error(f"{spec.series_id} archive row has no release_stage")
@@ -145,6 +156,8 @@ def _validate_snapshot(
                         f"{spec.series_id} stage {value.release_stage!r} is invalid for {mode} "
                         "assembly"
                     )
+            if historical_final_assumption and value.release_stage != "final":
+                validation.error("UMich historical-final assumption requires final rows")
             if value.retrieved_at is None:
                 validation.error(f"{spec.series_id} archive row has no retrieved_at")
             else:
@@ -159,12 +172,19 @@ def _validate_snapshot(
                             f"{spec.series_id} release {release.isoformat()} is after retrieval "
                             f"{retrieval_date.isoformat()}"
                         )
-                    effective_date = max(release, retrieval_date)
-                    if available_from is not None and available_from != effective_date:
-                        validation.error(
-                            f"{spec.series_id} available_from {available_from.isoformat()} does "
-                            f"not match effective availability {effective_date.isoformat()}"
-                        )
+                    if historical_final_assumption:
+                        if available_from is not None and available_from != release:
+                            validation.error(
+                                f"{spec.series_id} assumed available_from must equal release date"
+                            )
+                    else:
+                        effective_date = max(release, retrieval_date)
+                        if available_from is not None and available_from != effective_date:
+                            validation.error(
+                                f"{spec.series_id} available_from "
+                                f"{available_from.isoformat()} does not match effective "
+                                f"availability {effective_date.isoformat()}"
+                            )
 
     if len(validation.errors) > error_count:
         return ()
@@ -433,9 +453,22 @@ def assemble(
                 )
             )
 
+    assumption_flags = sorted(
+        {
+            f"validation_assumption:{value.availability_basis}"
+            for result in inputs.values()
+            for value in result.values
+            if value.availability_basis == HISTORICAL_FINAL_ASSUMPTION
+            and value.series_id == "UMICH_SCA_T2N_TOP"
+            and value.source == "archive"
+        }
+    )
     leading = [score for score in family_scores if score.role == "leading"]
     abstained = [score.family for score in leading if score.abstained]
-    flags = [f"family_abstention:{family}" for family in abstained]
+    flags = [
+        *assumption_flags,
+        *(f"family_abstention:{family}" for family in abstained),
+    ]
     if len(abstained) >= 2:
         flags.append(f"leading_abstained:{len(abstained)}_of_4_families")
         return AssemblyResult(

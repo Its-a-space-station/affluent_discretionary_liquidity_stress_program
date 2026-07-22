@@ -1,7 +1,7 @@
 # STATE.md — ADLS (Affluent Discretionary Liquidity Stress Program)
 
-*Last updated: 2026-07-21.* **New session? Read `HANDOFF.md` first** — the
-full narrative of how this repo got here and the Slice 6 starting point.
+*Last updated: 2026-07-22.* **New session? Read `HANDOFF.md` first** - the
+full narrative of how this repo completed all seven Phase 2 slices.
 
 ## Phase
 
@@ -31,8 +31,17 @@ forecasting models, schema adoption, external publication.
   archive provenance; pin WRMFNS weekday mapping, pooled-family staleness,
   archive release-stage/effective-availability rules, and a non-additive-safe
   validation outcome; then harden ALFRED cache coverage and fetch auditing.
+- 2026-07-21 — Before the first real-data validation run, owner approved the
+  exact errata item 5 baseline contract: seasonal m=12, AR(12), VAR(1),
+  36-month minimum, six-month recursive horizon, two-month p70 signal mapping,
+  latest-common outcome vintage, NBER ±6-month context, and 10,000 seeded joint
+  block trials with strict >12-month embargo.
 - 2026-07-19 — Bootstrap scaffold adopted from playbook templates; governing
   policy docs copied locally (safety, label, verification, maker_checker, report).
+- 2026-07-22 — Owner selected a cold start for the live canonical sequence.
+  `canonical/frozen_sequence.jsonl` remains intentionally empty; the Slice 6
+  frozen-equivalent reconstruction remains validation evidence under
+  `outputs/` and is not promoted into live history.
 - 2026-07-19 — Owner approved the CLAUDE.md §10 operating fields: providers
   (read-only public macro/credit series incl. FRED/ALFRED vintages, retail &
   luxury sales releases, deposit-flow data), deterministic composite criteria,
@@ -89,6 +98,38 @@ Loops produce findings and reports only — never actions.
 
 ## Last checkpoint
 
+- 2026-07-22 - Phase 2 Slice 7 complete. The owner selected a cold live-store
+  start, and the live JSONL remains zero bytes. `adls report` now snapshots all
+  local evidence, builds a calendar-derived canonical or provisional assembly,
+  obtains an independent checker result, and emits deterministic redacted
+  assembly JSON, canonical report JSON, and Markdown. Every finding has an
+  approved result label, confidence label, evidence IDs, and source timestamp;
+  UMich levels stay redacted and Visa is cited as `Visa via FRED`. The first
+  local report used the 2026-07-17 canonical assembly: the current assembly was
+  checker-`Verified`, three leading families were available, UMich correctly
+  abstained due to post-assembly retrieval, and the live band remained
+  `Unverified` under the cold start. Internal weekly reporting is ready with
+  those caveats; external publication is not. Live smoke also exposed and
+  repaired a cache watermark bug: completeness now advances through one
+  explicit fetch-date cutoff even when a series did not change that day. All
+  nine ALFRED series are complete through 2026-07-22; SQLite integrity is `ok`
+  with zero overlaps. Verification: 149 tests, ruff, touched-file format check,
+  and mypy across 43 source files.
+- 2026-07-21 — Phase 2 Slice 6 complete. The official internal-use UMich Table
+  2n historical workbook and the provider's 1991-2026 final-release calendar
+  were archived locally, then normalized into 425 final rows (1991-01 through
+  2026-05) under ignored paths. The approved real run reconstructed 155 frozen
+  months from 2013-05 through 2026-03 twice with identical bytes. Explicit
+  historical-final checker mode returned `Verified` with 310/310 checks; the
+  ordinary checker correctly returned `Conflicting`. All 155 records carry the
+  assumption flag, none expose licensed transformed levels, and none abstain.
+  The descriptive primary result found four evaluable episodes and two hits
+  (50%); it beat seasonal-naive (25%) and VAR(1) (38.4615%) but not AR(12)
+  (60%), so the pre-registered failure clause sets `coincident_monitor`.
+  Calibration is non-monotonic; the 10,000-trial joint null met the 15-point
+  ROPE, but all conclusions remain descriptive. Frozen/artifact SHA-256 values
+  are `9737d722...e49265` and `a6939894...79af`. Open debt remains VD-001,
+  VD-002, VD-004. The owner later selected a cold live-store start.
 - 2026-07-21 — Phase 2 Slice 5 complete: `src/adls/checker/` independently
   reads one consistent SQLite snapshot plus normalized archive evidence,
   selects active point-in-time episodes, and recomputes the full source
@@ -156,9 +197,7 @@ Loops produce findings and reports only — never actions.
 
 ## Next recommended action
 
-- Execute Phase 2 Slice 6: build the §9/§14 cache-only validation harness for
-  the mid-2013-present weekly reconstruction, outcome episodes, like-for-like
-  baseline floor, joint blocked permutation with embargo, per-regime reporting,
-  score-every-point abstention rows, calibration monotonicity, and explicit
-  validation debt. Then ask the owner whether the checker-Verified
-  frozen-equivalent reconstruction may seed the intentionally empty live store.
+- Owner review of the completed Slice 6 and Slice 7 worktree, followed by an
+  explicitly approved stage/commit/push. Operationally, continue the manual
+  Friday archive routine and local report cadence; scheduling and external
+  publication remain gated.

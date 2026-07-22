@@ -59,6 +59,19 @@ def _assembly_for_friday(friday: date) -> date:
     return candidate
 
 
+def is_assembly_date(day: date) -> bool:
+    """Return whether ``day`` is a scheduled weekly assembly date."""
+    _require_supported(day)
+    for days_back in range(7):
+        friday = day - timedelta(days=days_back)
+        if friday.weekday() != 4:
+            continue
+        if not CALENDAR_START_YEAR <= friday.year <= CALENDAR_END_YEAR:
+            continue
+        return _assembly_for_friday(friday) == day
+    return False
+
+
 def _parse_month(month: str) -> tuple[int, int]:
     if len(month) != 7 or month[4] != "-":
         raise ValueError(f"canonical month must use YYYY-MM, got {month!r}")
@@ -90,3 +103,12 @@ def next_month(month: str) -> str:
     if month_number == 12:
         return f"{year + 1:04d}-01"
     return f"{year:04d}-{month_number + 1:02d}"
+
+
+def canonical_month_for_assembly(assembly_date: date) -> str | None:
+    """Return the month finalized on ``assembly_date``, else ``None``."""
+    _require_supported(assembly_date)
+    shifted = assembly_date.year * 12 + assembly_date.month - 1 - 2
+    year, month_zero = divmod(shifted, 12)
+    month = f"{year:04d}-{month_zero + 1:02d}"
+    return month if monthly_finalization_date(month) == assembly_date else None

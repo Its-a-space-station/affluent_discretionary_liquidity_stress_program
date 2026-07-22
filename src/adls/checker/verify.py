@@ -13,7 +13,12 @@ from typing import TypeAlias, cast
 
 from .arithmetic import compute_assembly
 from .bands import classify_band, decision_payload, evaluate_band, publication_float
-from .calendar import monthly_finalization_date, next_month
+from .calendar import (
+    canonical_month_for_assembly,
+    is_assembly_date,
+    monthly_finalization_date,
+    next_month,
+)
 from .constants import (
     LEADING_FAMILIES,
     LICENSE_NOTICES,
@@ -29,7 +34,12 @@ from .models import (
     FamilyComputation,
     VerificationLabel,
 )
-from .sources import EvidenceConflict, EvidenceSources, EvidenceUnavailable
+from .sources import (
+    VALIDATION_ASSUMED_ARCHIVE_SERIES,
+    EvidenceConflict,
+    EvidenceSources,
+    EvidenceUnavailable,
+)
 
 JsonValue: TypeAlias = None | bool | int | float | str | list["JsonValue"] | dict[str, "JsonValue"]
 FROZEN_KEYS = {
@@ -90,6 +100,7 @@ SOURCE_FAMILY_KEYS = {
 }
 VALID_BANDS = {"Normal", "Watch", "Elevated", "High"}
 SIX_PLACES = Decimal("0.000001")
+VALIDATION_ASSUMPTION_FLAG = "validation_assumption:umich_unrevised_final"
 
 
 def _render_number(value: float) -> str:
@@ -173,7 +184,12 @@ def _band_value(value: object, field: str) -> str | None:
     return value
 
 
-def _validate_embedded_source(payload: dict[str, object], prefix: str) -> None:
+def _validate_embedded_source(
+    payload: dict[str, object],
+    prefix: str,
+    *,
+    required_mode: str = "canonical",
+) -> None:
     source_text = cast(str, payload["source_assembly_json"])
     source_hash = cast(str, payload["source_assembly_sha256"])
     if hashlib.sha256(source_text.encode("utf-8")).hexdigest() != source_hash:
@@ -191,8 +207,8 @@ def _validate_embedded_source(payload: dict[str, object], prefix: str) -> None:
     for field in ("assembly_date", "assembly_mode"):
         if not isinstance(source[field], str):
             raise ValueError(f"{prefix}.source_assembly_json.{field} must be a string")
-    if source["assembly_mode"] != "canonical":
-        raise ValueError(f"{prefix}.source_assembly_json must be canonical")
+    if source["assembly_mode"] != required_mode:
+        raise ValueError(f"{prefix}.source_assembly_json must be {required_mode}")
     if source["assembly_date"] != payload["finalized_on"]:
         raise ValueError(f"{prefix}.source_assembly_json assembly date differs")
     try:
@@ -616,13 +632,21 @@ def _family_payload(score: FamilyComputation) -> dict[str, object]:
     }
 
 
-def _assembly_payload(assembly: AssemblyComputation) -> dict[str, object]:
+def _assembly_payload(
+    assembly: AssemblyComputation,
+    *,
+    assembly_mode: str = "canonical",
+    assume_unrevised_archive_finals: bool = False,
+) -> dict[str, object]:
+    flags = list(assembly.flags)
+    if assume_unrevised_archive_finals:
+        flags.insert(0, VALIDATION_ASSUMPTION_FLAG)
     return {
         "assembly_date": assembly.assembly_date,
-        "assembly_mode": "canonical",
+        "assembly_mode": assembly_mode,
         "composite": {
             "abstained": assembly.composite_abstained,
-            "flags": list(assembly.flags),
+            "flags": flags,
             "headline_tier": assembly.headline_tier,
             "headline_value": assembly.headline_value,
             "tier_a_value": assembly.tier_a_value,
@@ -657,6 +681,8 @@ def _verify_source_record(
     assembly: AssemblyComputation,
     prefix: str,
     discrepancies: list[str],
+    *,
+    assume_unrevised_archive_finals: bool = False,
 ) -> None:
     source_text = record.get("source_assembly_json")
     source_hash = record.get("source_assembly_sha256")
@@ -683,7 +709,15 @@ def _verify_source_record(
         discrepancies.append(f"{prefix} source assembly cannot be parsed: {exc}")
         return
 
-    _compare(_assembly_payload(assembly), source, f"{prefix} source_assembly", discrepancies)
+    _compare(
+        _assembly_payload(
+            assembly,
+            assume_unrevised_archive_finals=assume_unrevised_archive_finals,
+        ),
+        source,
+        f"{prefix} source_assembly",
+        discrepancies,
+    )
 
     expected_families = {
         score.family: {
@@ -708,7 +742,11 @@ def _verify_source_record(
         actual_subset = {key: actual_composite.get(key) for key in expected_composite}
         _compare(expected_composite, actual_subset, f"{prefix} composite", discrepancies)
     _compare(
-        list(assembly.flags),
+        (
+            [VALIDATION_ASSUMPTION_FLAG, *assembly.flags]
+            if assume_unrevised_archive_finals
+            else list(assembly.flags)
+        ),
         record.get("assembly_flags"),
         f"{prefix} assembly_flags",
         discrepancies,
@@ -911,24 +949,178 @@ def verify_band_sequence(
     return result
 
 
+def verify_assembly(
+    cache_path: Path,
+    archive_paths: tuple[Path, ...],
+    assembly_json: bytes,
+    *,
+    rules: CheckerRules | None = None,
+) -> CheckResult:
+    """Independently verify one scheduled canonical or provisional assembly."""
+    checker_rules = rules or CheckerRules()
+    discrepancies: list[str] = []
+    debts: list[str] = []
+    checks: list[CheckEvidence] = []
+    source: dict[str, object] | None = None
+    assembly_date = "unknown"
+    assembly_mode = "provisional"
+
+    try:
+        source_text = assembly_json.decode("utf-8")
+        parsed = json.loads(source_text, object_pairs_hook=_reject_duplicate_keys)
+        source = _json_object(parsed, "assembly")
+        raw_date = source.get("assembly_date")
+        if not isinstance(raw_date, str):
+            raise ValueError("assembly.assembly_date must be a string")
+        parsed_date = date.fromisoformat(raw_date)
+        if parsed_date.isoformat() != raw_date:
+            raise ValueError("assembly.assembly_date is invalid")
+        if not is_assembly_date(parsed_date):
+            raise ValueError(f"{raw_date} is not a scheduled assembly date")
+        assembly_date = raw_date
+        assembly_mode = (
+            "canonical" if canonical_month_for_assembly(parsed_date) is not None else "provisional"
+        )
+        wrapper: dict[str, object] = {
+            "finalized_on": assembly_date,
+            "source_assembly_json": source_text,
+            "source_assembly_sha256": hashlib.sha256(assembly_json).hexdigest(),
+        }
+        _validate_embedded_source(
+            wrapper,
+            "assembly",
+            required_mode=assembly_mode,
+        )
+    except (
+        ArithmeticError,
+        RecursionError,
+        TypeError,
+        UnicodeError,
+        json.JSONDecodeError,
+        ValueError,
+    ) as exc:
+        discrepancies.append(f"assembly: {exc}")
+
+    check_id = f"assembly:{assembly_date}"
+    if checker_rules != CheckerRules():
+        discrepancies.append(
+            "checker criteria differ from adls.checker.v1; fault-injection results "
+            "cannot be Verified"
+        )
+    if source is None or discrepancies:
+        checks.append(CheckEvidence(check_id, False, "assembly is malformed or contradictory"))
+        return CheckResult(
+            _label(() if source is None else (source,), discrepancies, debts),
+            tuple(checks),
+            tuple(discrepancies),
+            tuple(debts),
+        )
+
+    try:
+        sources = EvidenceSources(cache_path, archive_paths, checker_rules)
+    except EvidenceUnavailable as exc:
+        debts.append(str(exc))
+        checks.append(CheckEvidence(check_id, False, "source evidence is unavailable"))
+        return CheckResult(
+            _label((source,), discrepancies, debts),
+            tuple(checks),
+            tuple(discrepancies),
+            tuple(debts),
+        )
+    except EvidenceConflict as exc:
+        discrepancies.append(str(exc))
+        debts.extend(exc.debts)
+        checks.append(CheckEvidence(check_id, False, "source evidence is contradictory"))
+        return CheckResult(
+            _label((source,), discrepancies, debts),
+            tuple(checks),
+            tuple(discrepancies),
+            tuple(debts),
+        )
+
+    before = len(discrepancies)
+    try:
+        histories = sources.histories_at(
+            assembly_date,
+            provisional=assembly_mode == "provisional",
+        )
+        assembly = compute_assembly(
+            assembly_date,
+            histories,
+            checker_rules,
+            provisional=assembly_mode == "provisional",
+        )
+        _compare(
+            _assembly_payload(assembly, assembly_mode=assembly_mode),
+            source,
+            "assembly",
+            discrepancies,
+        )
+    except EvidenceUnavailable as exc:
+        debts.append(f"{check_id}: {exc}")
+    except EvidenceConflict as exc:
+        discrepancies.append(f"{check_id}: {exc}")
+        debts.extend(f"{check_id}: {debt}" for debt in exc.debts)
+    except (ArithmeticError, TypeError, ValueError) as exc:
+        discrepancies.append(f"{check_id}: checker could not evaluate evidence: {exc}")
+    finally:
+        sources.close()
+
+    passed = len(discrepancies) == before and not debts
+    checks.append(
+        CheckEvidence(
+            check_id,
+            passed,
+            (
+                "independent source recomputation agrees"
+                if passed
+                else "independent source recomputation is incomplete or differs"
+            ),
+        )
+    )
+    return CheckResult(
+        _label((source,), discrepancies, debts),
+        tuple(checks),
+        tuple(discrepancies),
+        tuple(debts),
+    )
+
+
 def verify_frozen_sequence(
     cache_path: Path,
     archive_paths: tuple[Path, ...],
     frozen_path: Path,
     *,
     rules: CheckerRules | None = None,
+    assume_unrevised_archive_finals: bool = False,
 ) -> CheckResult:
     """Recompute every frozen source assembly and its sequence-owned bands."""
     checker_rules = rules or CheckerRules()
+    criteria_version = (
+        "adls.checker.validation-assumption.v1"
+        if assume_unrevised_archive_finals
+        else "adls.checker.v1"
+    )
     band_result, records = _verify_bands(frozen_path, checker_rules)
     checks = list(band_result.checks)
     discrepancies = list(band_result.discrepancies)
     debts = list(band_result.debts)
     if not records:
-        return band_result
+        return CheckResult(
+            band_result.label,
+            band_result.checks,
+            band_result.discrepancies,
+            band_result.debts,
+            criteria_version=criteria_version,
+        )
 
     try:
-        sources = EvidenceSources(cache_path, archive_paths, checker_rules)
+        sources = EvidenceSources(
+            cache_path,
+            archive_paths,
+            checker_rules,
+            assume_unrevised_archive_finals=assume_unrevised_archive_finals,
+        )
     except EvidenceUnavailable as exc:
         debts.append(str(exc))
         for position, record in enumerate(records, 1):
@@ -940,6 +1132,7 @@ def verify_frozen_sequence(
             tuple(checks),
             tuple(discrepancies),
             tuple(debts),
+            criteria_version=criteria_version,
         )
     except EvidenceConflict as exc:
         discrepancies.append(str(exc))
@@ -953,6 +1146,7 @@ def verify_frozen_sequence(
             tuple(checks),
             tuple(discrepancies),
             tuple(debts),
+            criteria_version=criteria_version,
         )
 
     try:
@@ -968,7 +1162,16 @@ def verify_frozen_sequence(
             try:
                 histories = sources.histories_at(finalized_on)
                 assembly = compute_assembly(finalized_on, histories, checker_rules)
-                _verify_source_record(record, assembly, check_id, discrepancies)
+                assumption_applied = assume_unrevised_archive_finals and bool(
+                    histories.get(VALIDATION_ASSUMED_ARCHIVE_SERIES)
+                )
+                _verify_source_record(
+                    record,
+                    assembly,
+                    check_id,
+                    discrepancies,
+                    assume_unrevised_archive_finals=assumption_applied,
+                )
             except EvidenceUnavailable as exc:
                 debts.append(f"{check_id}: {exc}")
             except EvidenceConflict as exc:
@@ -1000,4 +1203,5 @@ def verify_frozen_sequence(
         tuple(checks),
         tuple(discrepancies),
         tuple(debts),
+        criteria_version=criteria_version,
     )

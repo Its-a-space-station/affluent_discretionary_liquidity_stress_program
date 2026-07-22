@@ -225,3 +225,20 @@ def test_archive_effective_availability_is_rechecked_at_engine_boundary() -> Non
     assert any(
         "does not match effective availability" in error for error in result.validation.errors
     )
+
+
+def test_non_archive_input_cannot_claim_a_historical_availability_basis() -> None:
+    assembly_date, inputs = load_fixture_inputs(include_visa=True)
+    retail = inputs["RSFHFS"]
+    inputs["RSFHFS"] = PointInTimeResult(
+        tuple(
+            replace(value, availability_basis="umich_unrevised_final") for value in retail.values
+        ),
+        retail.validation,
+    )
+
+    result = assemble(assembly_date, inputs)
+
+    assert not result.validation.ok
+    assert any("cannot use availability basis" in error for error in result.validation.errors)
+    assert "validation_assumption:umich_unrevised_final" not in result.flags

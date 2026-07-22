@@ -31,9 +31,7 @@ class FakeSession:
 
 
 def _client(responses: list[FakeResponse]) -> AlfredClient:
-    return AlfredClient(
-        "fake-key-abc", session=FakeSession(responses), sleep_fn=lambda s: None
-    )
+    return AlfredClient("fake-key-abc", session=FakeSession(responses), sleep_fn=lambda s: None)
 
 
 def test_parse_value_sentinel() -> None:
@@ -43,10 +41,16 @@ def test_parse_value_sentinel() -> None:
 
 
 def test_observations_single_page() -> None:
-    payload = {"observations": [
-        {"date": "2013-04-01", "realtime_start": "2013-05-13",
-         "realtime_end": "9999-12-31", "value": "100.0"},
-    ]}
+    payload = {
+        "observations": [
+            {
+                "date": "2013-04-01",
+                "realtime_start": "2013-05-13",
+                "realtime_end": "9999-12-31",
+                "value": "100.0",
+            },
+        ]
+    }
     client = _client([FakeResponse(200, payload)])
     rows = client.get_observations("RSFSDP", realtime_end="2026-07-20")
     assert len(rows) == 1
@@ -55,6 +59,13 @@ def test_observations_single_page() -> None:
     assert client.last_request_stats.http_status == 200
     assert client.last_request_stats.requests_made == 1
     assert client._session.safe_params[-1]["realtime_end"] == "2026-07-20"
+
+
+def test_vintage_dates_honor_explicit_coverage_cutoff() -> None:
+    client = _client([FakeResponse(200, {"vintage_dates": ["2026-07-16"]})])
+
+    assert client.get_vintage_dates("RSFSDP", realtime_end="2026-07-22") == ["2026-07-16"]
+    assert client._session.safe_params[-1]["realtime_end"] == "2026-07-22"
 
 
 def test_429_backoff_then_success() -> None:
@@ -67,7 +78,11 @@ def test_429_backoff_then_success() -> None:
 
 
 def test_errors_never_contain_urls_or_key() -> None:
-    client = _client([FakeResponse(403), ])
+    client = _client(
+        [
+            FakeResponse(403),
+        ]
+    )
     with pytest.raises(AlfredClientError) as exc_info:
         client.get_observations("RSFSDP")
     message = str(exc_info.value)

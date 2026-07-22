@@ -20,6 +20,7 @@ ARCHIVE_COLUMNS = (
     "source_file",
     "retrieved_at",
 )
+VALIDATION_ASSUMED_ARCHIVE_SERIES = "UMICH_SCA_T2N_TOP"
 
 
 class EvidenceUnavailable(RuntimeError):
@@ -216,6 +217,8 @@ class EvidenceSources:
         cache_path: Path,
         archive_paths: tuple[Path, ...],
         rules: CheckerRules,
+        *,
+        assume_unrevised_archive_finals: bool = False,
     ) -> None:
         archive_entries: tuple[_ArchiveEntry, ...] = ()
         archive_conflict: EvidenceConflict | None = None
@@ -261,18 +264,28 @@ class EvidenceSources:
         self._connection = connection
         self._archive_entries = archive_entries
         self._rules = rules
+        self._assume_unrevised_archive_finals = assume_unrevised_archive_finals
 
     def close(self) -> None:
         self._connection.close()
 
-    def histories_at(self, assembly_date: str) -> dict[str, tuple[SourceValue, ...]]:
+    def histories_at(
+        self,
+        assembly_date: str,
+        *,
+        provisional: bool = False,
+    ) -> dict[str, tuple[SourceValue, ...]]:
         _iso_date(assembly_date, "assembly_date")
         histories: dict[str, tuple[SourceValue, ...]] = {}
         conflicts: list[str] = []
         debts: list[str] = []
         for rule in SERIES_RULES:
             try:
-                histories[rule.series_id] = self._history_at(rule, assembly_date)
+                histories[rule.series_id] = self._history_at(
+                    rule,
+                    assembly_date,
+                    provisional=provisional,
+                )
             except EvidenceConflict as exc:
                 conflicts.append(str(exc))
                 debts.extend(exc.debts)
@@ -288,9 +301,11 @@ class EvidenceSources:
         self,
         rule: SeriesRule,
         assembly_date: str,
+        *,
+        provisional: bool,
     ) -> tuple[SourceValue, ...]:
         if rule.source == "archive":
-            return self._archive_history(rule, assembly_date)
+            return self._archive_history(rule, assembly_date, provisional=provisional)
         return self._alfred_history(rule, assembly_date)
 
     def _alfred_history(
@@ -371,6 +386,8 @@ class EvidenceSources:
         self,
         rule: SeriesRule,
         assembly_date: str,
+        *,
+        provisional: bool,
     ) -> tuple[SourceValue, ...]:
         series_rows = tuple(
             entry for entry in self._archive_entries if entry.series_id == rule.series_id
@@ -384,13 +401,23 @@ class EvidenceSources:
             )
 
         eligible: dict[str, _ArchiveEntry] = {}
+        assume_unrevised = (
+            self._assume_unrevised_archive_finals
+            and rule.series_id == VALIDATION_ASSUMED_ARCHIVE_SERIES
+        )
         for entry in series_rows:
-            if entry.release_stage != "final":
+            allowed_stages = (
+                {"preliminary", "final"}
+                if provisional and rule.series_id == VALIDATION_ASSUMED_ARCHIVE_SERIES
+                else {"final"}
+            )
+            if entry.release_stage not in allowed_stages:
                 continue
+            available_date = entry.release_date if assume_unrevised else entry.effective_date
             available = (
-                entry.effective_date <= assembly_date
+                available_date <= assembly_date
                 if self._rules.pit_inclusive
-                else entry.effective_date < assembly_date
+                else available_date < assembly_date
             )
             if not available:
                 continue
@@ -404,7 +431,7 @@ class EvidenceSources:
                 observation_date=entry.observation_date,
                 value_text=entry.value_text,
                 release_date=entry.release_date,
-                available_from=entry.effective_date,
+                available_from=(entry.release_date if assume_unrevised else entry.effective_date),
                 source="archive",
                 source_file=entry.source_file,
                 release_stage=entry.release_stage,

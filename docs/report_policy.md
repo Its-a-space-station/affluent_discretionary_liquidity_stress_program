@@ -59,10 +59,10 @@ we are. Avoid persuasive or directive language. The reader decides.
 
 ## 7. Phase 2 status
 
-The weekly report generator is authorized but not implemented yet. This remains
-its binding contract and a prerequisite for the reporting gate in
-[promotion_policy.md](promotion_policy.md); external publication still requires
-explicit approval.
+The local weekly report generator was implemented in Slice 7 on 2026-07-22.
+Its operating contract is recorded in [weekly_reporting.md](weekly_reporting.md).
+This policy remains binding; scheduling, delivery, and external publication
+still require separate explicit approval.
 
 ## 8. Playbook v2: evidence alignment, pointers, canonical order
 

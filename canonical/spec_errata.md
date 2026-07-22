@@ -1,9 +1,10 @@
 # Spec Errata — owner-approved convention pins
 
-Items 1-6 were approved 2026-07-20 with the Phase 2 plan. Items 7-10 were
-approved as repair or implementation pins on 2026-07-21. These close
-conventions the spec (v1.2) left open or stated incorrectly; each entry is
-binding on both the engine (maker) and the checker.
+Items 1-4 and 6 were approved 2026-07-20 with the Phase 2 plan. Item 5 was
+finalized and owner-approved 2026-07-21 before the first real-data validation
+run. Items 7-10 were approved as repair or implementation pins on 2026-07-21.
+These close conventions the spec (v1.2) left open or stated incorrectly; each
+entry is binding on both the engine (maker) and the checker.
 
 1. **z-score window**: the trailing window EXCLUDES the current observation
    (consistent with §2's percentile convention); standard deviation is the
@@ -24,13 +25,17 @@ binding on both the engine (maker) and the checker.
    `WRMFNS` is natively Monday-stamped and shifts **+2 calendar days** to its
    corresponding canonical Wednesday before month assignment. A month is
    complete only when the selected release covers its last canonical Wednesday.
-5. **Baseline exact specs** (to be filled IN THIS FILE before the first
-   real-data validation run, per §14.1 — placeholders intentionally not
-   pre-filled with numbers chosen after seeing data):
-   - seasonal-naive: m = 12, scored via MASE — PENDING final forecast→
-     lead-event mapping
-   - AR: fixed order, PENDING
-   - VAR: small fixed order over the three long-history family series, PENDING
+5. **Baseline exact specs — APPROVED 2026-07-21 before first real-data run:**
+   frozen Tier-A monthly target; seasonal naive m=12; AR(12); VAR(1) over the
+   three Tier-A family z-score series; intercepts and expanding complete
+   suffixes with minimum 36 months; six-month recursive horizon. A baseline
+   signal requires two consecutive forecast months at or above the origin's
+   frozen p70 threshold and is scored against the same event in either of the
+   next two calendar quarters. Outcome uses the latest common cached vintage.
+   Joint null uses 10,000 trials, seed 20260719, 12-month circular blocks, and a
+   strict >12-month donor/target embargo. Turning context is ±6 months around
+   the static NBER peak/trough table. These values are immutable for the first
+   real-data run; later changes require a new pre-registered protocol version.
 6. **2013 retail vintage depth — RESOLVED 2026-07-20 (live smoke, cached
    spans):** RSFSDP and RSFHFS earliest vintage is 2013-05-13, each carrying
    256 monthly observations back to 1992-01-01 — comfortably exceeding the

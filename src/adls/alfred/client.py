@@ -112,14 +112,23 @@ class AlfredClient:
                 return rows
             offset += PAGE_LIMIT
 
-    def get_vintage_dates(self, series_id: str) -> list[str]:
+    def get_vintage_dates(
+        self,
+        series_id: str,
+        realtime_end: str = FULL_REALTIME_END,
+    ) -> list[str]:
         self._begin_call("vintagedates")
         dates: list[str] = []
         offset = 0
         while True:
             payload = self._get_json(
                 "series/vintagedates",
-                {"series_id": series_id, "limit": PAGE_LIMIT, "offset": offset},
+                {
+                    "series_id": series_id,
+                    "realtime_end": realtime_end,
+                    "limit": PAGE_LIMIT,
+                    "offset": offset,
+                },
             )
             batch = payload.get("vintage_dates", [])
             dates.extend(batch)
@@ -146,7 +155,9 @@ class AlfredClient:
 
     def _get_json(self, endpoint: str, params: dict[str, str | int]) -> dict:
         full_params: dict[str, str | int] = {
-            "api_key": self._api_key, "file_type": "json", **params
+            "api_key": self._api_key,
+            "file_type": "json",
+            **params,
         }
         url = f"{BASE}/{endpoint}"
         last_status: int | None = None

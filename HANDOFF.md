@@ -1,4 +1,4 @@
-# HANDOFF — sessions of 2026-07-19 through 2026-07-21
+# HANDOFF — sessions of 2026-07-19 through 2026-07-22
 
 For the next session. Read this WITH `STATE.md` (live snapshot) and
 `tasks/todo.md` (slice checklist) — the SessionStart hook auto-injects those
@@ -18,9 +18,14 @@ Composite Spec v1.2 → **Phase 2 authorized** → **Slice 1 built, live-verifie
 and pushed** (`537c1d0`) → **Slice 1 repaired and pushed** (`ef69c8c`) →
 **Slice 2 built and pushed** (`7927586`) → **Slice 3 built, independently
 reviewed, and pushed** (`8621898`) → **Slice 4 built, independently reviewed,
-repaired, and pushed** (`c4bb2e7`) → **Slice 5 built, independently reviewed,
-repaired, and verified locally on 2026-07-21**. Everything below exists to let
-you continue from Slice 6 without re-deriving any of it.
+repaired, and pushed** (`c4bb2e7`) → **Slice 5 built, reviewed, repaired, and
+pushed** (`7bd5f46`) → **Slice 6 built, real-data executed, and independently
+checker-Verified under its explicit historical-final assumption** → **Slice 7
+built, live-verified, and documented**. The
+pre-registered result is `coincident_monitor`: 2/4 episode hits, better than
+seasonal-naive and VAR but worse than AR(12), with non-monotonic calibration.
+The owner selected a cold live-store start; the first local weekly report is
+complete and external publication remains gated.
 
 ## What was decided (all owner-approved, in order)
 
@@ -58,10 +63,10 @@ you continue from Slice 6 without re-deriving any of it.
    mapping; complete pooled families only; archive availability is the later of
    release/retrieval with explicit stages and bounded coverage; validation uses
    an equal mean of independently detrended real-PCE component gaps, never a
-   sum of chained-dollar levels. Baseline exact specs must be pinned there
-   BEFORE the first real-data validation run (item 5, still placeholder).
+   sum of chained-dollar levels. Baseline exact specs were owner-approved in
+   item 5 on 2026-07-21, before the first real-data validation run.
 
-## Where the code stands (Slices 1-4 of 7 complete)
+## Where the code stands (Slices 1-7 complete)
 
 - `src/adls/`: config (only getenv site, never echoes), registry (Basket v1 as
   data, including WRMFNS +2-day canonical shift), contracts,
@@ -69,8 +74,10 @@ you continue from Slice 6 without re-deriving any of it.
   retry with backoff, per-call status telemetry, **URL-free errors** — the key
   rides the query string), `alfred/cache.py` (span-based SQLite vintage cache
   with declared, non-regressing coverage), `cli.py` (`adls fetch`). Fetches now
-  cap observations to the latest vintage returned by the preceding vintage-date
-  call and audit the two endpoints separately.
+  pin discovery and observations to one explicit fetch-date cutoff, mark
+  completeness through that cutoff after both succeed, and audit the endpoints
+  separately. This correctly handles series whose last change predates the
+  requested point-in-time date.
 - `inputs/archive.py` validates normalized CSVs with collected errors/warnings,
   canonical UTC/date/stage/provenance rules, deterministic sequence and
   duplicate/conflict checks, frequency-gap warnings, non-overlapping episodes,
@@ -96,7 +103,7 @@ you continue from Slice 6 without re-deriving any of it.
   canonical source assembly and hash. Reads revalidate chronology, source,
   PIT dates, redaction/licenses, composite arithmetic, and band replay. Thread
   and process locks cover validation through fsync. The committed live store is
-  empty until the owner decides whether to seed it after Slice 6.
+  intentionally empty under the owner-approved cold start.
 - `checker/` independently reconstructs cache/archive PIT histories, all five
   family scores, Tier A/B composites, finalization dates, and frozen band/dwell
   state from checker-owned SQL, constants, calendar, and arithmetic. It holds
@@ -104,13 +111,44 @@ you continue from Slice 6 without re-deriving any of it.
   audits all evidence before applying conflict-over-debt labels, and is posture-
   barred from maker/input/ALFRED/registry/contracts/calendar imports. The five
   planned defect seeds all produce `Conflicting`; the remaining two-implementer
-  acceptance gap is tracked in `docs/verification_debt.md` VD-001.
-- 109/109 unit + posture tests, ruff, explicit touched-file format check, and
-  mypy are green (`.venv`, Python 3.14).
+  acceptance gap is tracked in `docs/verification_debt.md` VD-001. Slice 7 adds
+  checker-owned verification of standalone canonical and provisional weekly
+  assemblies without weakening that import boundary.
+- `validation/` now performs one-snapshot weekly/frozen reconstruction, marks
+  the historical UMich-final assumption in canonical source flags, independently
+  detrends both real-PCE components, retains every score origin and abstention,
+  evaluates seasonal-naive/AR/VAR controls, static NBER regimes, calibration,
+  and a joint embargoed block null, and emits deterministic descriptive-only
+  bytes. The explicit checker assumption mode verifies fixture and real
+  reconstructions; ordinary mode rejects both. The first real run used the
+  approved contract unchanged across 155 canonical months (2013-05 through
+  2026-03), repeated byte-identically, and passed 310/310 checker checks. Its
+  four episodes produced two hits; the primary beat seasonal-naive and VAR but
+  not AR(12), invoking the binding `coincident_monitor` failure clause. See
+  `docs/validation_harness.md`.
+- `reporting/` snapshots the cache and file evidence once, builds and
+  independently verifies the current assembly, and emits exact assembly JSON,
+  canonical evidence-bearing report JSON, and Markdown. Every finding carries
+  result/confidence labels, evidence IDs, and a timestamp. The launch audit
+  keeps the `coincident_monitor`, non-monotonic calibration, open debt, cold
+  history, and external-publication gate visible. See
+  `docs/weekly_reporting.md`.
+- 149/149 unit + posture tests, ruff, explicit touched-file format check, and
+  mypy across 43 source files are green (`.venv`, Python 3.14).
   (env-token confinement, requests confined to alfred/, forbidden-vocabulary
-  scan with sort_order/ORDER BY exemptions, no scheduler artifacts).
-- **Live-verified**: RSFSDP (166 vintages/2,512 spans), RSFHFS (166/2,607),
-  VISASMIDSA (27/176) cached in `data/adls.sqlite` (git-ignored).
+  scan with sort_order/ORDER BY exemptions, validation network/wall-clock
+  confinement, no scheduler artifacts).
+- **Live cache**: all nine ALFRED series are complete through the explicit
+  2026-07-22 fetch cutoff in ignored `data/adls.sqlite`; the two PCE outcomes
+  still share latest common change vintage 2026-06-25. SQLite integrity is
+  `ok` and span overlaps are zero. The live
+  smoke found and fixed valid ALFRED `.` sentinels being misclassified as
+  fatal outcome corruption.
+- **UMich historical source READY**: the official Table 2n workbook and
+  provider-authored 1991-2026 final-release calendar are preserved in ignored
+  `data_archive/2026-07-21/`; 425 normalized finals live only under ignored
+  `data/normalized_archive/`. Licensed levels are absent from tracked files and
+  generated canonical bytes.
 - **Vintage-depth RESOLVED** (errata item 6): 2013-05-13 first vintages carry
   256 obs back to 1992 — 10y z-windows fully powered, no fallback.
 - **Visa SMI methodology RESOLVED**: 0–200 diffusion index, neutral 100 →
@@ -126,26 +164,20 @@ you continue from Slice 6 without re-deriving any of it.
 - `FRED_API_KEY` is in `.env` (git-ignored, owner-entered via hidden prompt;
   **never read or log it** — source it: `set -a; source .env; set +a`).
 
-## Immediate next step: Slice 6 — validation harness
+## Immediate next step: owner review
 
-Per the approved plan, build `src/adls/validation/` as a cache-only §9/§14
-harness. Reconstruct weekly point-in-time assemblies from mid-2013 onward
-(Visa joins in 2024-05; UMich's unrevised-finals assumption stays debt-logged),
-write a separate frozen-equivalent artifact, and evaluate the pre-registered
-combined real discretionary-services PCE outcome. Compare against the same
-lead-event framing for seasonal-naive/MASE, fixed-order AR, and small VAR
-baselines; use joint 12-month circular blocks with a 12-month embargo, report
-macro-averages by regime, retain every abstention as a scored row, and produce
-the calibration monotonicity and binding power tables. After checker
-verification, ask the owner whether that reconstruction may seed the still-
-empty live frozen store; do not promote it automatically.
+1. Review the completed Slice 6 and Slice 7 worktree. Do not stage, commit, or
+   push until the owner explicitly approves those steps.
+2. Continue the manual Friday archive routine and local weekly report cadence.
+   Keep the historical reconstruction separate, preserve the cold-start
+   boundary, and leave scheduling and external publication gated.
 
 ## Deferred owner decisions (raise at the flagged moment, not before)
 
-- Seed the live frozen store from the checker-Verified §9 reconstruction, or
-  start cold? → after Slice 6.
-- statsmodels as optional `[validation]` extra vs pinned-fixture cross-check
-  only? → Slice 6 (default: pinned fixtures).
+- Live-store decision resolved 2026-07-22: start cold. Reconsidering or seeding
+  later requires a new explicit owner decision and adjudication of open debt.
+- statsmodels choice resolved to the default pinned-fixture-only path; the
+  one-time 0.14.5 cross-check is committed, with no runtime dependency.
 - Playbook schema enums (`object_type: macro_indicator`, `project: adls`) —
   playbook-side change, blocks canonical schema adoption only.
 - Optional: enrich playbook `before_universal_forecaster_use` with gate
@@ -168,7 +200,8 @@ empty live frozen store; do not promote it automatically.
 - Weekly manual archive routine is due each Friday (`data_archive/README.md`)
   — ICI is the source that decays (20-week window). The 2026-07-19 ICI log used
   an obsolete 2025-named URL; the raw file was preserved and correct current-
-  year provenance was captured in `2026-07-21/` (byte-identical). FINRA/UMich/
+  year provenance was captured in `2026-07-21/` (byte-identical). UMich's
+  historical workbook and release calendar were captured there as well. FINRA/
   EGI/JPMC/BofA are still manual steps.
 
 ## Beyond this repo (context the next session may need)
@@ -197,7 +230,9 @@ empty live frozen store; do not promote it automatically.
 
 ## The acid test
 
-You should be able to: read this + STATE + todo, `cd` here, source the local
-git-ignored environment without printing it, run `.venv/bin/pytest -q` (expect
-109 green), and start Slice 6 from the checker-Verified frozen-equivalent
-contract without re-opening any question settled above.
+You should be able to: read this + STATE + todo, `cd` here, run
+`.venv/bin/pytest -q` (expect 140 green), and repeat `adls validate` against the
+ignored normalized UMich archive with byte-identical outputs. The explicit
+assumption checker must return `Verified`; ordinary mode must return
+`Conflicting`. Slice 6 is complete. Do not seed the live store until the owner
+answers the now-due decision.

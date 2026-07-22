@@ -40,6 +40,28 @@ the composite.
 
 ## Project-specific lessons
 
+### 2026-07-21 — Provider missing sentinels are abstentions, not corruption
+
+**Context:** The first live Slice 6 outcome smoke loaded latest-vintage PCE
+histories after the missing ALFRED series were backfilled.
+**Lesson:** ALFRED legitimately carries `.` before a series begins. Treating the
+sentinel as malformed numeric data made an otherwise valid common-vintage
+snapshot fail; silently dropping the affected score origins would have violated
+§14's score-every-point rule.
+**Apply:** Aggregate provider missing sentinels as source warnings, omit them
+from level histories, and let each dependent outcome/score row abstain visibly.
+Keep arbitrary nonnumeric text and nonpositive PCE levels as hard errors.
+
+### 2026-07-21 — Unpinned validation choices must stop before data access
+
+**Context:** Errata item 5 deliberately left AR/VAR lags and the forecast-to-
+event mapping open until Slice 6.
+**Lesson:** A default selected after reading outcomes is indistinguishable from
+researcher degrees of freedom, even when the code is deterministic.
+**Apply:** Encode the complete proposal and fixture-test it, but keep the
+real-data CLI fail-closed until the owner approves the exact pin. Record every
+tail/model/source gap as an abstention row rather than deleting the origin.
+
 ### 2026-07-21 — Defect seeds need discriminating fixtures
 
 **Context:** Slice 5 first seeded sample variance (`ddof=1`) into the checker,
@@ -106,9 +128,36 @@ members to mechanically cancel in exactly the target episodes.
 before a spec leaves the maker; identity-coupled series pairs don't belong in
 the same additive composite.
 
+## A missing normalized artifact is not a missing source contract
+
+**Context:** Slice 6 initially treated the absent expected UMich CSV filename as
+if the source inputs themselves were unavailable. The repo already named the
+provider table, archive layout, normalized schema, exact target series, license
+boundary, and reconstructed release-calendar requirement. Following those
+pointers led to the official workbook and provider-authored release calendar.
+**Lesson:** Distinguish an absent derived artifact from absent source knowledge.
+**Apply:** Before declaring a data blocker, trace registry -> spec -> archive
+contract -> provenance log -> provider references, including ignored paths.
+
+## A coverage watermark is not the last change date
+
+**Context:** The first Slice 7 cache refresh succeeded for every series, but
+several coverage rows did not advance because `series/vintagedates` reports only
+dates on which values changed. A later report date was therefore rejected even
+though the refresh had established that the unchanged value remained current.
+**Lesson:** Completeness is a property of the bounded query, not the latest
+event returned inside that query. Conflating the two makes quiet series appear
+unavailable between releases.
+**Apply:** Pin discovery and observation calls to one explicit as-of cutoff,
+mark coverage through that cutoff only after both succeed, reject responses
+beyond it, and regression-test an unchanged series whose last change predates
+the requested point-in-time date.
+
 ## Repeated mistakes to avoid
 
 - Signing a series from intuition without named-episode walkthroughs.
 - Pre-registering a validation step against data whose vintage limitations the
   basket doc already recorded (UMich has no vintage archive; the protocol cited
   it anyway).
+- Treating a missing derived filename as proof that the repo lacks the source
+  contract or enough provenance to reconstruct it.

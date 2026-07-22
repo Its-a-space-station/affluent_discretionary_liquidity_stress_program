@@ -10,14 +10,23 @@ from pathlib import Path
 
 import pytest
 
+from adls.alfred.cache import VintageCache
 from adls.calendarutil import monthly_finalization_date
-from adls.checker import CheckerRules, verify_band_sequence, verify_frozen_sequence
+from adls.checker import (
+    CheckerRules,
+    verify_assembly,
+    verify_band_sequence,
+    verify_frozen_sequence,
+)
 from adls.checker.sources import EvidenceSources
 from adls.contracts import PointInTimeResult, ValidationResult
 from adls.engine.canonical import freeze_canonical_month
 from adls.engine.core import assemble
 from adls.engine.models import AssemblyResult, FamilyScore
-from adls.engine.serialize import canonical_json_bytes
+from adls.engine.serialize import canonical_json_bytes, serialize_assembly
+from adls.inputs.archive import load_archive_csv
+from adls.inputs.loader import PointInTimeLoader
+from adls.registry import REGISTRY
 from fixtures.engine.gen_slice3_fixture import load_fixture_inputs
 
 
@@ -268,7 +277,7 @@ def test_checker_recomputes_frozen_record_from_independent_sources(
 
     result = verify_frozen_sequence(cache_path, (archive_path,), frozen_path)
 
-    assert result.label == "Verified"
+    assert result.label == "Verified", result
     assert result.criteria_version == "adls.checker.v1"
     assert result.discrepancies == ()
     assert result.debts == ()
@@ -276,6 +285,73 @@ def test_checker_recomputes_frozen_record_from_independent_sources(
         "bands:2020-04",
         "source:2020-04",
     }
+
+
+def test_checker_verifies_standalone_canonical_assembly(
+    checker_episode: tuple[Path, Path, Path],
+) -> None:
+    cache_path, archive_path, frozen_path = checker_episode
+    frozen = json.loads(frozen_path.read_bytes())
+    assembly_bytes = frozen["source_assembly_json"].encode("utf-8")
+
+    result = verify_assembly(cache_path, (archive_path,), assembly_bytes)
+
+    assert result.label == "Verified", result
+    assert result.discrepancies == ()
+    assert result.debts == ()
+    assert result.checks[0].check_id == "assembly:2020-06-19"
+
+
+def test_checker_verifies_standalone_provisional_assembly(tmp_path: Path) -> None:
+    _, fixture_inputs = load_fixture_inputs(include_visa=True)
+    assembly_date = "2020-06-26"
+    cache_path = tmp_path / "vintages.sqlite3"
+    archive_path = tmp_path / "umich.csv"
+    _write_cache(cache_path, fixture_inputs, assembly_date)
+    _write_archive(
+        archive_path,
+        fixture_inputs["UMICH_SCA_T2N_TOP"],
+        assembly_date,
+    )
+    archive = load_archive_csv(archive_path)
+    loader = PointInTimeLoader(VintageCache(cache_path), archive)
+    histories = {
+        spec.series_id: loader.history_at(
+            spec.series_id,
+            assembly_date,
+            provisional=True,
+        )
+        for spec in REGISTRY
+        if spec.role in {"leading", "overlay"}
+    }
+    assembly = assemble(assembly_date, histories)
+    assert assembly.validation.ok, assembly.validation.errors
+    assembly_bytes = serialize_assembly(assembly)
+    assert json.loads(assembly_bytes)["assembly_mode"] == "provisional"
+
+    result = verify_assembly(cache_path, (archive_path,), assembly_bytes)
+
+    assert result.label == "Verified", result
+    assert result.discrepancies == ()
+    assert result.debts == ()
+
+
+def test_checker_rejects_standalone_assembly_mode_mutation(
+    checker_episode: tuple[Path, Path, Path],
+) -> None:
+    cache_path, archive_path, frozen_path = checker_episode
+    frozen = json.loads(frozen_path.read_bytes())
+    assembly = json.loads(frozen["source_assembly_json"])
+    assembly["assembly_mode"] = "provisional"
+
+    result = verify_assembly(
+        cache_path,
+        (archive_path,),
+        canonical_json_bytes(assembly),
+    )
+
+    assert result.label == "Conflicting"
+    assert any("must be canonical" in item for item in result.discrepancies)
 
 
 @pytest.mark.parametrize(

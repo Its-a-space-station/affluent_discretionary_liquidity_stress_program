@@ -48,6 +48,8 @@ def _numeric_rows(
     rule: SeriesRule,
     history: tuple[SourceValue, ...],
     assembly: date,
+    *,
+    provisional: bool,
 ) -> tuple[tuple[date, float], ...]:
     rows: list[tuple[date, float]] = []
     prior_observation: date | None = None
@@ -80,8 +82,10 @@ def _numeric_rows(
             raise EvidenceConflict(f"{rule.series_id} contains future information")
         if available_from < release:
             raise EvidenceConflict(f"{rule.series_id} availability precedes release")
-        if rule.source == "archive" and value.release_stage != "final":
-            raise EvidenceConflict(f"{rule.series_id} canonical history is not final-only")
+        allowed_stages = {"preliminary", "final"} if provisional else {"final"}
+        if rule.source == "archive" and value.release_stage not in allowed_stages:
+            mode = "provisional" if provisional else "canonical"
+            raise EvidenceConflict(f"{rule.series_id} history is invalid for {mode} mode")
 
         latest_observation = observation
         if value.value_text == ".":
@@ -112,8 +116,10 @@ def _monthly_values(
     rule: SeriesRule,
     history: tuple[SourceValue, ...],
     assembly: date,
+    *,
+    provisional: bool,
 ) -> tuple[DatedValue, ...]:
-    rows = _numeric_rows(rule, history, assembly)
+    rows = _numeric_rows(rule, history, assembly, provisional=provisional)
     if rule.frequency in {"m", "q"}:
         points: list[DatedValue] = []
         for observation, value in rows:
@@ -175,8 +181,10 @@ def _single_transform(
     rule: SeriesRule,
     history: tuple[SourceValue, ...],
     assembly: date,
+    *,
+    provisional: bool,
 ) -> tuple[DatedValue, ...]:
-    points = _monthly_values(rule, history, assembly)
+    points = _monthly_values(rule, history, assembly, provisional=provisional)
     if rule.transform == "hundred_minus_level":
         return tuple(DatedValue(point.observation_date, 100.0 - point.value) for point in points)
     if rule.transform == "inverted_level":
@@ -192,11 +200,18 @@ def _pooled_transform(
     family_rules: tuple[SeriesRule, ...],
     histories: dict[str, tuple[SourceValue, ...]],
     assembly: date,
+    *,
+    provisional: bool,
 ) -> tuple[DatedValue, ...]:
     monthly = {
         rule.series_id: {
             date.fromisoformat(point.observation_date): point.value
-            for point in _monthly_values(rule, histories[rule.series_id], assembly)
+            for point in _monthly_values(
+                rule,
+                histories[rule.series_id],
+                assembly,
+                provisional=provisional,
+            )
         }
         for rule in family_rules
     }
@@ -272,6 +287,8 @@ def _family_inputs(
     all_histories: dict[str, tuple[SourceValue, ...]],
     assembly: date,
     checker_rules: CheckerRules,
+    *,
+    provisional: bool,
 ) -> tuple[
     dict[str, tuple[SourceValue, ...]],
     tuple[tuple[str, str], ...],
@@ -286,7 +303,7 @@ def _family_inputs(
             flags.append(f"missing_member:{rule.series_id}")
             continue
         # Full row validation is part of the independent arithmetic path.
-        _numeric_rows(rule, history, assembly)
+        _numeric_rows(rule, history, assembly, provisional=provisional)
         histories[rule.series_id] = history
         release_dates = [
             _iso_date(value.release_date, f"{rule.series_id} release_date") for value in history
@@ -307,6 +324,8 @@ def _score_leading(
     all_histories: dict[str, tuple[SourceValue, ...]],
     assembly: date,
     checker_rules: CheckerRules,
+    *,
+    provisional: bool,
 ) -> FamilyComputation:
     family_rules = rules_for_family(family)
     histories, releases, flags = _family_inputs(
@@ -315,13 +334,24 @@ def _score_leading(
         all_histories,
         assembly,
         checker_rules,
+        provisional=provisional,
     )
     if flags:
         return _abstained_family(family, family_rules, releases, flags)
     transformed = (
-        _pooled_transform(family_rules, histories, assembly)
+        _pooled_transform(
+            family_rules,
+            histories,
+            assembly,
+            provisional=provisional,
+        )
         if len(family_rules) > 1
-        else _single_transform(family_rules[0], histories[family_rules[0].series_id], assembly)
+        else _single_transform(
+            family_rules[0],
+            histories[family_rules[0].series_id],
+            assembly,
+            provisional=provisional,
+        )
     )
     z_score, reason = _trailing_z(transformed, 36, checker_rules)
     if z_score is None:
@@ -350,6 +380,8 @@ def _score_strain(
     all_histories: dict[str, tuple[SourceValue, ...]],
     assembly: date,
     checker_rules: CheckerRules,
+    *,
+    provisional: bool,
 ) -> FamilyComputation:
     family_rules = rules_for_family("strain")
     histories, releases, flags = _family_inputs(
@@ -358,6 +390,7 @@ def _score_strain(
         all_histories,
         assembly,
         checker_rules,
+        provisional=provisional,
     )
     if flags:
         return _abstained_family("strain", family_rules, releases, flags)
@@ -366,7 +399,12 @@ def _score_strain(
     observations: list[str] = []
     score_flags: list[str] = []
     for rule in family_rules:
-        transformed = _single_transform(rule, histories[rule.series_id], assembly)
+        transformed = _single_transform(
+            rule,
+            histories[rule.series_id],
+            assembly,
+            provisional=provisional,
+        )
         minimum = 20 if rule.frequency == "q" else 36
         z_score, reason = _trailing_z(transformed, minimum, checker_rules)
         if z_score is None:
@@ -395,13 +433,21 @@ def compute_assembly(
     assembly_date: str,
     histories: dict[str, tuple[SourceValue, ...]],
     rules: CheckerRules,
+    *,
+    provisional: bool = False,
 ) -> AssemblyComputation:
     """Recompute one canonical assembly without calling maker code."""
     assembly = _iso_date(assembly_date, "assembly_date")
     family_scores = tuple(
-        _score_strain(histories, assembly, rules)
+        _score_strain(histories, assembly, rules, provisional=provisional)
         if family == "strain"
-        else _score_leading(family, histories, assembly, rules)
+        else _score_leading(
+            family,
+            histories,
+            assembly,
+            rules,
+            provisional=provisional,
+        )
         for family in FAMILY_SEQUENCE
     )
     leading = [score for score in family_scores if score.family in LEADING_FAMILIES]

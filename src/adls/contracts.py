@@ -67,6 +67,7 @@ class PointInTimeValue:
     source_file: str | None = None
     release_stage: str | None = None
     retrieved_at: str | None = None
+    availability_basis: str = "observed"
 
 
 @dataclass(frozen=True)

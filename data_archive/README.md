@@ -85,4 +85,6 @@ under `data/normalized_archive/` with these required columns:
 The ICI pull used an obsolete 2025-named URL, so its provenance is invalid even
 though its bytes match the later current-year retrieval. The raw evidence is
 preserved. Correct 2026 provenance was captured on 2026-07-21; see both dated
-logs. FINRA / UMich / EGI / JPMC / BofA remain manual first-pass items.
+logs. The internal-use UMich Table 2n historical workbook and provider release
+calendar were also captured on 2026-07-21 and normalized only under ignored
+paths. FINRA / EGI / JPMC / BofA remain manual first-pass items.
