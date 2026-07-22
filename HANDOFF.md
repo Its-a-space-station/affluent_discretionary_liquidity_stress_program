@@ -18,8 +18,9 @@ Composite Spec v1.2 → **Phase 2 authorized** → **Slice 1 built, live-verifie
 and pushed** (`537c1d0`) → **Slice 1 repaired and pushed** (`ef69c8c`) →
 **Slice 2 built and pushed** (`7927586`) → **Slice 3 built, independently
 reviewed, and pushed** (`8621898`) → **Slice 4 built, independently reviewed,
+repaired, and pushed** (`c4bb2e7`) → **Slice 5 built, independently reviewed,
 repaired, and verified locally on 2026-07-21**. Everything below exists to let
-you continue from Slice 5 without re-deriving any of it.
+you continue from Slice 6 without re-deriving any of it.
 
 ## What was decided (all owner-approved, in order)
 
@@ -96,7 +97,15 @@ you continue from Slice 5 without re-deriving any of it.
   PIT dates, redaction/licenses, composite arithmetic, and band replay. Thread
   and process locks cover validation through fsync. The committed live store is
   empty until the owner decides whether to seed it after Slice 6.
-- 79/79 unit + posture tests, ruff, explicit touched-file format check, and
+- `checker/` independently reconstructs cache/archive PIT histories, all five
+  family scores, Tier A/B composites, finalization dates, and frozen band/dwell
+  state from checker-owned SQL, constants, calendar, and arithmetic. It holds
+  one SQLite read snapshot, validates exact embedded/outer schemas and hashes,
+  audits all evidence before applying conflict-over-debt labels, and is posture-
+  barred from maker/input/ALFRED/registry/contracts/calendar imports. The five
+  planned defect seeds all produce `Conflicting`; the remaining two-implementer
+  acceptance gap is tracked in `docs/verification_debt.md` VD-001.
+- 109/109 unit + posture tests, ruff, explicit touched-file format check, and
   mypy are green (`.venv`, Python 3.14).
   (env-token confinement, requests confined to alfred/, forbidden-vocabulary
   scan with sort_order/ORDER BY exemptions, no scheduler artifacts).
@@ -117,15 +126,19 @@ you continue from Slice 5 without re-deriving any of it.
 - `FRED_API_KEY` is in `.env` (git-ignored, owner-entered via hidden prompt;
   **never read or log it** — source it: `set -a; source .env; set +a`).
 
-## Immediate next step: Slice 5 — independent checker
+## Immediate next step: Slice 6 — validation harness
 
-Per the approved plan, build `src/adls/checker/` as a genuinely separate
-recomputation path: its own SQL, vintage selection, arithmetic, and constants
-retyped from the spec; it may import config only, never maker/input/ALFRED code.
-Start fail-before with seeded defects for ddof, percentile current-value
-inclusion/off-by-one, one-month dwell, PIT `<` versus `<=`, and staleness. Every
-seed must return Conflicting. Record the honest verification debt that a
-same-repo checker is not the spec §12 two-independent-implementer standard.
+Per the approved plan, build `src/adls/validation/` as a cache-only §9/§14
+harness. Reconstruct weekly point-in-time assemblies from mid-2013 onward
+(Visa joins in 2024-05; UMich's unrevised-finals assumption stays debt-logged),
+write a separate frozen-equivalent artifact, and evaluate the pre-registered
+combined real discretionary-services PCE outcome. Compare against the same
+lead-event framing for seasonal-naive/MASE, fixed-order AR, and small VAR
+baselines; use joint 12-month circular blocks with a 12-month embargo, report
+macro-averages by regime, retain every abstention as a scored row, and produce
+the calibration monotonicity and binding power tables. After checker
+verification, ask the owner whether that reconstruction may seed the still-
+empty live frozen store; do not promote it automatically.
 
 ## Deferred owner decisions (raise at the flagged moment, not before)
 
@@ -186,6 +199,5 @@ same-repo checker is not the spec §12 two-independent-implementer standard.
 
 You should be able to: read this + STATE + todo, `cd` here, source the local
 git-ignored environment without printing it, run `.venv/bin/pytest -q` (expect
-79 green), and start Slice 5 with checker posture and seeded-defect
-fixtures
-without re-opening any question settled above.
+109 green), and start Slice 6 from the checker-Verified frozen-equivalent
+contract without re-opening any question settled above.

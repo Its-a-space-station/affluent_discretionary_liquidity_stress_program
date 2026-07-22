@@ -82,7 +82,18 @@
       observations, malformed persisted dates, licensed-level leakage, and
       threshold-rounding contradictions are regression-tested. Independent
       review findings repaired; 79/79 tests + ruff + format + mypy green.
-- [ ] Slice 5 — independent checker (maker≠checker in code; seeded-defect tests).
+- [x] Slice 5 — independent checker (maker≠checker in code; seeded-defect tests).
+      Complete 2026-07-21: checker-owned SQL/archive PIT selection, static
+      Basket/calendar constants, transforms, population z-scores, composite
+      arithmetic, canonical schema/hash checks, and percentile/dwell replay;
+      no maker/input/ALFRED/registry/contracts/calendar imports. One explicit
+      SQLite read snapshot prevents mixed-state assemblies. ddof, percentile,
+      dwell, PIT-boundary, and staleness seeds each produce `Conflicting`, and
+      noncanonical checker rules can never return `Verified`. Adversarial review
+      drove nested-schema, malformed-evidence, UTC, competing-episode, numeric-
+      typing, snapshot, and posture repairs. The same-repo/two-implementer gap is
+      open as `docs/verification_debt.md` VD-001. 109/109 tests + ruff + touched-
+      file format check + mypy green.
 - [ ] Slice 6 — validation harness (§9+§14); then owner decision: seed frozen
       store from checker-Verified reconstruction?
 - [ ] Slice 7 — weekly report + launch-condition audit.
@@ -98,7 +109,7 @@
       determinism bounds).
 - [ ] Housekeeping (owner call): move the misfiled AIRS-Bench paper from
       "Papers on Time Series Forecasting" to "Papers on Coding".
-- [ ] Maker/checker split defined: composite computation (maker) vs independent
+- [x] Maker/checker split defined: composite computation (maker) vs independent
       recomputation + range/sanity checks (checker).
 - [ ] Canonical labels only in belief cards; indicator levels stay data fields.
 

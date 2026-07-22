@@ -1,7 +1,7 @@
 # STATE.md — ADLS (Affluent Discretionary Liquidity Stress Program)
 
 *Last updated: 2026-07-21.* **New session? Read `HANDOFF.md` first** — the
-full narrative of how this repo got here and the Slice 5 starting point.
+full narrative of how this repo got here and the Slice 6 starting point.
 
 ## Phase
 
@@ -89,6 +89,22 @@ Loops produce findings and reports only — never actions.
 
 ## Last checkpoint
 
+- 2026-07-21 — Phase 2 Slice 5 complete: `src/adls/checker/` independently
+  reads one consistent SQLite snapshot plus normalized archive evidence,
+  selects active point-in-time episodes, and recomputes the full source
+  assembly and frozen band sequence from checker-owned constants, calendar,
+  transforms, population z-scores, composite arithmetic, percentiles, and
+  dwell. Posture tests prevent imports from maker/input/ALFRED/registry/
+  contracts/calendar code, network/environment access, and static or dynamic
+  import escapes. Exact nested schemas, source bytes/hash, six-place numeric
+  types, source-to-outer consistency, archive stages/effective dates, and
+  future episodes are checked without uncaught malformed-evidence failures.
+  All five planned defect seeds return `Conflicting`; noncanonical rules cannot
+  return `Verified`. Adversarial review drove repairs for false-Verified nested
+  fields and integer encodings, mixed SQLite snapshots, archive parsing/UTC,
+  malformed evidence, future-episode coverage, and posture bypasses. The honest
+  §12 two-independent-implementer gap is open as verification debt VD-001.
+  Verification: 109/109 tests, ruff, touched-file format check, and mypy.
 - 2026-07-21 — Phase 2 Slice 4 complete: a static 2013-2027 NYSE calendar
   enforces Friday/next-business-day assemblies and derives canonical versus
   provisional mode; canonical month M finalizes only at the first assembly on
@@ -140,8 +156,9 @@ Loops produce findings and reports only — never actions.
 
 ## Next recommended action
 
-- Execute Phase 2 Slice 5: build the independent checker with its own SQL,
-  vintage selection, arithmetic, constants, percentile, and dwell paths;
-  posture-enforce that it imports nothing from maker/input/ALFRED modules, then
-  prove seeded ddof, percentile, dwell, PIT-boundary, and staleness defects are
-  all reported as Conflicting.
+- Execute Phase 2 Slice 6: build the §9/§14 cache-only validation harness for
+  the mid-2013-present weekly reconstruction, outcome episodes, like-for-like
+  baseline floor, joint blocked permutation with embargo, per-regime reporting,
+  score-every-point abstention rows, calibration monotonicity, and explicit
+  validation debt. Then ask the owner whether the checker-Verified
+  frozen-equivalent reconstruction may seed the intentionally empty live store.

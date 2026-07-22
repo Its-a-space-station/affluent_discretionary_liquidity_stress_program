@@ -40,6 +40,19 @@ the composite.
 
 ## Project-specific lessons
 
+### 2026-07-21 — Defect seeds need discriminating fixtures
+
+**Context:** Slice 5 first seeded sample variance (`ddof=1`) into the checker,
+but the synthetic episode's five family z-scores were all capped at ±3 under
+both population and sample variance.
+**Lesson:** A seeded defect is not demonstrated merely because the test toggles
+a rule. The fixture must put the affected calculation away from clipping,
+rounding ties, abstention, or another invariant that can mask the mutation.
+**Apply:** Require each seeded-defect test to assert a concrete field-level
+difference in addition to the `Conflicting` label. Noncanonical checker rules
+can never return `Verified`, even when a mutation happens to be observationally
+equivalent for one fixture.
+
 ### 2026-07-21 — Append-only requires replay validation and one locked transaction
 
 **Context:** Slice 4's first frozen-store writer refused a sequential duplicate,
