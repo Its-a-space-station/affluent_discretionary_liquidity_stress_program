@@ -167,6 +167,23 @@ review. The coordinator cannot write the candidate or automatically close the
 debt, and packet verification must reject extra files, relaxed permissions,
 path leakage, mutation, and impossible event ordering.
 
+## Exact cross-implementation checks must pin intermediate arithmetic and tokens
+
+**Context:** The first sealed VD-001 reconstruction disagreed broadly because
+the packet did not say that canonical month labels freeze each family's latest
+complete ragged-edge observation. After that repair, 17 percentile thresholds
+still differed only at exact half-quantum ties, and two stale flags differed only
+in spelling.
+**Lesson:** Output precision does not define intermediate arithmetic, and a
+free-form string field is not an interoperable vocabulary. Exact byte acceptance
+requires a language-neutral rank formula, numeric domain, operation order,
+quantization point, tie rule, token grammar, and deterministic order.
+**Apply:** Use exact rational type-7 interpolation over persisted decimal tokens,
+publish synthetic tie vectors, pin canonical flag tokens, and treat a sealed
+independent mismatch as a specification test rather than teaching the hidden
+reference values to the implementer. Preserve the failed seal and rerun with a
+fresh context-free implementation after the packet is repaired.
+
 ## Repeated mistakes to avoid
 
 - Signing a series from intuition without named-episode walkthroughs.

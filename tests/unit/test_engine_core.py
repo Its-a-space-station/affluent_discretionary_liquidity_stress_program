@@ -100,6 +100,37 @@ def test_required_member_staleness_drops_family_and_renormalizes_once() -> None:
     assert "leading_renormalized:census_retail" in result.flags
 
 
+def test_multiple_stale_member_flags_use_canonical_tokens_and_registry_order() -> None:
+    assembly_date, inputs = load_fixture_inputs(include_visa=True)
+    stale_release = (date.fromisoformat(assembly_date) - timedelta(days=41)).isoformat()
+    inputs = _replace_release(inputs, "RSFSDP", stale_release)
+    inputs = _replace_release(inputs, "RSFHFS", stale_release)
+
+    result = assemble(assembly_date, inputs)
+    retail = next(family for family in result.family_scores if family.family == "census_retail")
+
+    assert retail.flags == ("stale_member:RSFSDP", "stale_member:RSFHFS")
+
+
+def test_canonical_family_scores_latest_available_observation_not_slot_month() -> None:
+    assembly_date, inputs = load_fixture_inputs(include_visa=True)
+    for series_id in ("RSFSDP", "RSFHFS", "UMICH_SCA_T2N_TOP"):
+        result = inputs[series_id]
+        may_value = replace(
+            result.values[-1],
+            observation_date="2020-05-01",
+            value_text=str(float(result.values[-1].value_text) + 1.0),
+        )
+        inputs[series_id] = PointInTimeResult((*result.values, may_value), result.validation)
+
+    result = assemble(assembly_date, inputs)
+    families = {family.family: family for family in result.family_scores}
+
+    assert result.validation.ok
+    assert families["census_retail"].observation_date == "2020-05-01"
+    assert families["umich_top_tercile"].observation_date == "2020-05-01"
+
+
 def test_two_leading_family_abstentions_force_composite_abstention() -> None:
     assembly_date, inputs = load_fixture_inputs(include_visa=True)
     assembly = date.fromisoformat(assembly_date)

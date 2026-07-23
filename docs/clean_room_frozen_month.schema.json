@@ -70,7 +70,12 @@
       "additionalProperties": false,
       "properties": {
         "abstained": {"type": "boolean"},
-        "flags": {"items": {"type": "string"}, "type": "array"},
+        "flags": {
+          "description": "Canonical family flags; stale required members use stale_member:<series_id> in binding basket order.",
+          "items": {"type": "string"},
+          "type": "array",
+          "uniqueItems": true
+        },
         "z_score": {"type": ["number", "null"]}
       },
       "required": ["abstained", "flags", "z_score"],

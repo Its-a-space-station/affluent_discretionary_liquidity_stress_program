@@ -41,6 +41,16 @@ def test_linear_percentile_and_exact_band_boundaries_are_pinned() -> None:
     assert classify_band(95.001, thresholds) == "High"
 
 
+def test_percentile_half_quantum_uses_exact_decimal_type_7_arithmetic() -> None:
+    prior_values = (-1.0,) * 31 + (-0.100000, -0.099985) + (1.0,) * 13
+
+    assert linear_percentile(prior_values, 0.70) == -0.0999925
+    decision = evaluate_band(prior_values, None, 0.0)
+
+    assert decision.thresholds is not None
+    assert decision.thresholds.p70 == -0.099992
+
+
 def test_current_value_is_excluded_and_month_36_only_starts_dwell() -> None:
     thirty_four_prior = tuple(float(value) for value in range(34))
     before_burn_in = evaluate_band(thirty_four_prior, None, 1_000_000.0)

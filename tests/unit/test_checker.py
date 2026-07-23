@@ -18,6 +18,7 @@ from adls.checker import (
     verify_band_sequence,
     verify_frozen_sequence,
 )
+from adls.checker.bands import evaluate_band as checker_evaluate_band
 from adls.checker.sources import EvidenceSources
 from adls.contracts import PointInTimeResult, ValidationResult
 from adls.engine.canonical import freeze_canonical_month
@@ -774,6 +775,15 @@ def test_checker_replays_band_sequence_without_maker_band_code(band_sequence: Pa
 
     assert result.label == "Verified"
     assert result.discrepancies == ()
+
+
+def test_checker_independently_uses_exact_decimal_percentile_arithmetic() -> None:
+    prior_values = (-1.0,) * 31 + (-0.100000, -0.099985) + (1.0,) * 13
+
+    decision = checker_evaluate_band(prior_values, None, 0.0, CheckerRules())
+
+    assert decision.thresholds is not None
+    assert decision.thresholds.p70 == -0.099992
 
 
 @pytest.mark.parametrize(

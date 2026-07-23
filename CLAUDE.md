@@ -12,8 +12,11 @@ stress in affluent-household discretionary spending** (e.g., credit and deposit
 flows, luxury/discretionary sales, delinquency and drawdown behavior) and turns
 it into verified, labeled findings and reports usable as a **leading-indicator
 signal layer** for the wider research family. It informs a human; it never acts.
-Current phase: **Phase 3A verification and operational hardening**. The exact authorized and gated scope
-is recorded in `STATE.md`; do not infer broader operational authority from it.
+Current phase: **Phase 3A verification and operational hardening**. A fresh
+packet-only VD-001 reconstruction exactly matched, and the owner confirmed both
+implementer independence and the evidence-transfer record. VD-001 is closed.
+The exact authorized and gated scope is recorded in `STATE.md`; do not infer
+broader operational authority from it.
 
 ## 2. Startup reading sequence
 

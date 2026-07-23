@@ -66,6 +66,15 @@ every record, and decimal values rendered to six places with round-half-even.
 Months must be consecutive and exactly cover the manifest window. The schema
 is `docs/clean_room_frozen_month.schema.json`.
 
+The binding reconstruction pins in `canonical/spec_errata.md` travel inside
+the packet. In particular, the implementer must score each family's latest
+complete transformed observation available at the finalization assembly; form
+holiday-shifted weekly assemblies before applying the M+2 cutoff; compute band
+percentiles with exact type-7 decimal interpolation over persisted six-place
+Tier-A values; and serialize stale-member flags as
+`stale_member:<series_id>` in basket order. These are acceptance semantics, not
+implementation hints.
+
 This is an acceptance projection, not a replacement canonical-store schema.
 It covers the Tier-A frozen sequence and bands named by spec section 12 without
 requiring the implementer to reproduce ADLS's internal record wrapper.

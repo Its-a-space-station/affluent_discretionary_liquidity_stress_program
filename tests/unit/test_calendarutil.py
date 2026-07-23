@@ -32,6 +32,8 @@ def test_monthly_finalization_handles_weekend_and_holiday_edges() -> None:
     assert monthly_finalization_date("2025-02") == date(2025, 4, 21)
     # A normal Friday threshold finalizes on the threshold itself.
     assert monthly_finalization_date("2024-01") == date(2024, 3, 15)
+    # Good Friday before a weekend cutoff rolls across the 15th first.
+    assert monthly_finalization_date("2017-02") == date(2017, 4, 17)
 
 
 def test_only_monthly_finalization_assembly_has_a_canonical_month() -> None:

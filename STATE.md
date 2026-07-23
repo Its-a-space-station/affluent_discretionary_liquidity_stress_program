@@ -7,20 +7,21 @@ Phase 3A.
 ## Phase
 
 **Phase 3A - Verification and operational hardening (authorized 2026-07-22).**
-The seven Phase 2 implementation slices are complete. Phase 3A is limited to a
-blind VD-001 clean-room handoff and exact comparison harness, plus hardening of
-the existing manual archive/report workflow. Still gated: schedulers/launchd,
-new provider adapters, any execution path, forecasting models, schema adoption,
-cross-system feeds, and external publication.
+The seven Phase 2 implementation slices are complete. The blind VD-001
+clean-room handoff is complete and the debt is closed; remaining Phase 3A
+authority is limited to hardening the existing manual archive/report workflow.
+Still gated: schedulers/launchd, new provider adapters, any execution path,
+forecasting models, schema adoption, cross-system feeds, and external
+publication.
 
 ## Current MVP scope
 
 - In scope: the approved read-only FRED/ALFRED adapter and durable vintage
   cache; a uniform local-archive/PIT input layer; the deterministic composite
   engine in spec §1-§7; the §9/§14 validation harness; and a local weekly
-  research-report generator. Phase 3A adds coordinator-only clean-room packet,
-  submission-seal, and post-submission comparison tooling for VD-001, plus
-  manual operational hardening.
+  research-report generator. Phase 3A includes the completed coordinator-only
+  clean-room packet, submission-seal, and post-submission comparison tooling
+  for VD-001, plus manual operational hardening.
 - Explicitly deferred: any scheduled loop, new provider, forecasting model,
   schema adoption, external publication, cross-system signal feed, or anything
   execution-capable unless separately approved.
@@ -49,6 +50,17 @@ cross-system feeds, and external publication.
   hardening. The first priority is a blind, spec-only VD-001 clean-room packet
   and exact post-submission comparison harness. Preparing the packet does not
   constitute the second implementation and cannot itself close VD-001.
+- 2026-07-22 - After the first sealed reconstruction exposed exact-comparison
+  ambiguities, the owner approved binding errata items 11-14: latest complete
+  ragged-edge observation selection, holiday-roll-before-cutoff ordering, exact
+  rational type-7 percentile interpolation over persisted six-place values,
+  and `stale_member:<series_id>` tokens in basket order.
+- 2026-07-22 - After the fresh packet-only reconstruction exactly matched all
+  155 records, the owner confirmed that its context-free process satisfies
+  Composite Spec v1.2 §12 implementer independence and that local handling of
+  the internal-use evidence was authorized. VD-001 is closed. This decision
+  does not change the cold live-store start or any scheduling, schema,
+  cross-system, or publication gate.
 - 2026-07-19 — Owner approved the CLAUDE.md §10 operating fields: providers
   (read-only public macro/credit series incl. FRED/ALFRED vintages, retail &
   luxury sales releases, deposit-flow data), deterministic composite criteria,
@@ -102,11 +114,34 @@ Loops produce findings and reports only — never actions.
 - Canonical schema enums (`object_type`, `project`) do not include
   `macro_indicator` / `adls` — playbook-side extension needs owner approval
   before schema adoption can be checked off.
-- VD-001 requires a genuinely independent implementer. The local packet and
-  comparator cannot satisfy that independence criterion by themselves.
 
 ## Last checkpoint
 
+- 2026-07-22 - Owner reviewed and closed VD-001.
+  The original blind attempt was sealed before disclosure and returned 1,100
+  value-free differences. A post-seal packet-only correction reduced that to
+  19, isolating two genuinely unpinned conventions: 17 exact half-quantum
+  percentile thresholds and two stale-flag tokens. Owner-approved errata
+  items 11-14 repaired those gaps. Maker and checker now independently use
+  exact rational type-7 interpolation, with synthetic tie, calendar crossover,
+  ragged-edge, and flag-order regressions. The regenerated 155-month reference
+  is checker-`Verified` across 310 checks at frozen SHA-256
+  `ee717ec9739a9bcefc7da92f15076de9ff3c7e08aee4a3e6bcff2ec551497207`.
+  A new immutable packet verifies at manifest SHA-256
+  `eed37d40c76d2f561835db490cd0e83c4a026f2dc196734816f21fcb05e9a048`.
+  Fresh context-free implementation `codex-independent-cleanroom-20260722-v2-a`
+  attested to packet-only local work, passed 13 independent tests, was sealed at
+  submission SHA-256
+  `fa4bf3cef81bf8eee87d567411d511c06d52257fd0279f05590934d96f386e00`,
+  and exactly matched the checker-Verified neutral projection across all 155
+  records at SHA-256
+  `21f061228f65582f4527fcb95bea967ae257e9578636c73334f409651dfd4694`.
+  The comparison reports zero differences and status
+  `open_pending_human_review`. The owner then reviewed the packet-only
+  attestation, confirmed §12 implementer independence and authorized local
+  evidence handling, and closed VD-001; no tool closed it automatically.
+  Repository verification: 167 tests, full ruff, touched-file format check, and
+  mypy across 47 source files.
 - 2026-07-22 - Phase 3A clean-room coordinator slice complete. The stdlib-only
   `cleanroom/` package and three manual CLI commands prepare a reference-free
   packet, seal a canonical candidate before disclosure, and compare it against
@@ -119,8 +154,9 @@ Loops produce findings and reports only — never actions.
   differing values, and no result changes debt automatically. The real ignored
   32 MB packet verifies across 155 months at manifest SHA-256
   `ed8ebc3ca3c7da9474708b64ac85a78d7fa65e872479f9e9f1a53ec48a4f531b`;
-  no independent candidate exists yet, so VD-001 remains open. Verification:
-  163 tests, ruff, touched-file format check, and mypy across 47 source files.
+  no independent candidate existed at that checkpoint, so VD-001 remained
+  open. Verification: 163 tests, ruff, touched-file format check, and mypy
+  across 47 source files.
 - 2026-07-22 - Phase 2 Slices 6 and 7 were owner-reviewed, committed, and
   pushed to `origin/main` as `0d95cec`. The owner selected a cold live-store
   start, and the live JSONL remains zero bytes. `adls report` now snapshots all
@@ -221,10 +257,6 @@ Loops produce findings and reports only — never actions.
 
 ## Next recommended action
 
-- Keep the reference and implementation repository hidden while an authorized,
-  genuinely independent implementer works only from the frozen clean-room
-  packet. Seal the returned candidate before running the comparison; VD-001
-  remains open until owner review even after an exact technical match.
 - Run the first operational weekly cycle on Friday 2026-07-24: capture the
   manual no-vintage sources,
   refresh ALFRED, advance normalized archive coverage with provenance-bearing

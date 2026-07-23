@@ -20,24 +20,32 @@ def publication_float(value: float) -> float:
     return float(format(rounded, "f"))
 
 
-def _percentile(values: tuple[float, ...], percentile: float) -> float:
+def _percentile(values: tuple[float, ...], percentile_numerator: int) -> Decimal:
     if not values:
         raise ValueError("percentile requires values")
-    ordered = sorted(values)
-    position = (len(ordered) - 1) * percentile
-    lower = math.floor(position)
-    upper = math.ceil(position)
-    if lower == upper:
+    if not 0 <= percentile_numerator <= 100:
+        raise ValueError("percentile numerator must be between 0 and 100")
+    ordered = sorted(Decimal(str(value)) for value in values)
+    position = Decimal(len(ordered) - 1) * Decimal(percentile_numerator) / Decimal(100)
+    lower = int(position)
+    if lower == len(ordered) - 1:
         return ordered[lower]
-    weight = position - lower
-    return ordered[lower] + (ordered[upper] - ordered[lower]) * weight
+    weight = position - Decimal(lower)
+    return ordered[lower] + (ordered[lower + 1] - ordered[lower]) * weight
+
+
+def _publication_decimal(value: Decimal) -> float:
+    rounded = value.quantize(SIX_PLACES, rounding=ROUND_HALF_EVEN)
+    if rounded == 0:
+        rounded = abs(rounded)
+    return float(format(rounded, "f"))
 
 
 def _thresholds(values: tuple[float, ...]) -> BandThresholds:
     return BandThresholds(
-        publication_float(_percentile(values, 0.70)),
-        publication_float(_percentile(values, 0.85)),
-        publication_float(_percentile(values, 0.95)),
+        _publication_decimal(_percentile(values, 70)),
+        _publication_decimal(_percentile(values, 85)),
+        _publication_decimal(_percentile(values, 95)),
     )
 
 

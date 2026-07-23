@@ -41,7 +41,7 @@ from .spec import BASELINE_TARGET, FORECAST_EVENT_MAPPING, OUTCOME_VINTAGE_POLIC
 
 CRITERIA_VERSION = "adls.validation.v1"
 SCHEMA_VERSION = "adls.validation.artifact.v1"
-DEBT_IDS = ("VD-001", "VD-002", "VD-004")
+DEBT_IDS = ("VD-002", "VD-004")
 
 
 def _json_ready(value: object) -> JsonValue:

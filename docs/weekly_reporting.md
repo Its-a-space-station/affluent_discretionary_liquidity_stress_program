@@ -77,12 +77,16 @@ External readiness additionally requires all leading families, live band
 history, an allowed leading claim, monotonic calibration, closed verification
 debt, and separate publication approval.
 
-The current binding validation artifact says:
+The binding validation artifact generated before VD-001 owner review says:
 
 - `monitor_status = coincident_monitor`;
 - `leading_claim_allowed = false`;
 - calibration is non-monotonic; and
-- VD-001, VD-002, and VD-004 remain open.
+- VD-001, VD-002, and VD-004 were open when that artifact was generated.
+
+The owner discharged VD-001 on 2026-07-22 after accepting the exact independent
+reconstruction. New validation artifacts carry only VD-002 and VD-004; the
+pre-review artifact remains preserved as clean-room evidence.
 
 Therefore external publication is not ready regardless of the current
 composite reading. The report remains local and research-only.

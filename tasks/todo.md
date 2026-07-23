@@ -151,12 +151,20 @@
       submission seal, and an exact coordinator-side comparison report. The
       packet must contain no reference sequence, source code, or tests and does
       not itself count as the independent implementation. Complete 2026-07-22:
-      the ignored 155-month packet verifies at manifest SHA-256 `ed8ebc3c...f531b`;
-      163 tests + ruff + touched format + mypy across 47 source files are green.
-- [ ] Obtain a sealed reconstruction from a genuinely independent implementer
-      who worked only from the approved packet; compare only after sealing.
-- [ ] Human-review an exact match or adjudicate every discrepancy and add
-      regression evidence before considering VD-001 for closure.
+      the replacement ignored 155-month packet verifies at manifest SHA-256
+      `eed37d40...9a048`; 167 tests + ruff + touched format + mypy across 47
+      source files are green.
+- [x] Obtain and seal a fresh packet-only reconstruction before disclosure.
+      Implementation `codex-independent-cleanroom-20260722-v2-a` attested to no
+      ADLS/reference/prior-attempt access, passed 13 independent tests, and
+      exactly matched all 155 checker-Verified projection records at SHA-256
+      `21f06122...d4694`. The comparator left VD-001
+      `open_pending_human_review` as required.
+- [x] Human-review the exact match and close VD-001 only after every discrepancy
+      is adjudicated and regression-tested. Complete 2026-07-22: the owner
+      confirmed that the fresh context-free packet-only process satisfies §12
+      implementer independence and that local internal-use evidence handling
+      was authorized. No tool closed the debt automatically.
 - [ ] Harden the existing manual archive/report workflow without adding a
       scheduler, provider adapter, publication path, or cross-system feed.
 

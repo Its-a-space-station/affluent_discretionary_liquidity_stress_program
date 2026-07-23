@@ -3,8 +3,10 @@
 Items 1-4 and 6 were approved 2026-07-20 with the Phase 2 plan. Item 5 was
 finalized and owner-approved 2026-07-21 before the first real-data validation
 run. Items 7-10 were approved as repair or implementation pins on 2026-07-21.
-These close conventions the spec (v1.2) left open or stated incorrectly; each
-entry is binding on both the engine (maker) and the checker.
+Items 11-14 were owner-approved 2026-07-22 after the first blind VD-001
+reconstruction exposed cross-implementation ambiguities. These close
+conventions the spec (v1.2) left open or stated incorrectly; each entry is
+binding on both the engine (maker) and the checker.
 
 1. **z-score window**: the trailing window EXCLUDES the current observation
    (consistent with §2's percentile convention); standard deviation is the
@@ -78,3 +80,36 @@ entry is binding on both the engine (maker) and the checker.
     interpolated thresholds are rendered to six-place half-even precision
     before boundary classification so the persisted threshold and band replay
     without contradiction.
+11. **Canonical ragged-edge observation**: canonical month `M` names the frozen
+    output slot, not a forced input-observation month. At `M`'s finalization
+    assembly, each complete family transforms its full point-in-time history and
+    scores the latest transformed observation available at that assembly. A
+    pooled monthly family uses its latest common transformed month; a pooled
+    weekly family uses its latest common complete canonical-Wednesday month; and
+    UMich uses its latest released final. The z-score window is anchored on that
+    selected observation and still excludes it under item 1.
+12. **Holiday-roll ordering at the monthly cutoff**: first form every scheduled
+    weekly assembly by rolling its Friday anchor to the next market business day,
+    then choose the first resulting assembly on or after the 15th of `M+2`. A
+    Friday before the 15th can therefore finalize `M` when a market-holiday roll
+    lands on or after the cutoff. For example, 2017-02 finalizes on Monday
+    2017-04-17 because Good Friday 2017-04-14 rolls across the threshold.
+13. **Language-neutral percentile arithmetic**: percentile inputs are the prior
+    persisted six-place `tier_a_value` tokens parsed as exact decimal multiples
+    of `10^-6`. Sort them numerically and use exact type-7 interpolation: for
+    `n` values and `q` in `{70/100, 85/100, 95/100}`, set
+    `r = (n - 1) * q`, `i = floor(r)`, and `f = r - i`; the unrounded threshold
+    is `x[i] + f * (x[i+1] - x[i])` (or `x[i]` when `i = n - 1`). Quantize once
+    to `10^-6` with round-half-even, normalize negative zero, persist that
+    threshold, and classify against it. Binary floating intermediates and fused
+    substitutions are prohibited for this step. Synthetic conformance vector:
+    46 sorted values consisting of 31 copies of `-1.000000`, then `-0.100000`,
+    `-0.099985`, and 13 copies of `1.000000` produce exact p70 rank `31.5`,
+    unrounded `-0.0999925`, and published p70 `-0.099992`.
+14. **Canonical stale-family flag token and order**: a stale required member is
+    serialized as ASCII `stale_member:<series_id>`. When multiple members of a
+    family are stale, emit tokens in approved basket/registry order:
+    `RSFSDP`, `RSFHFS` for Census retail;
+    `DPSACBW027SBOG`, `WRMFNS` for household liquidity; and
+    `UMICH_SCA_T2N_TOP` for UMich. Alternate spellings such as `stale_input` are
+    non-canonical.

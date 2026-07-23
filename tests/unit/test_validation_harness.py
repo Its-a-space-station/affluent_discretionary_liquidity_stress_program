@@ -106,4 +106,4 @@ def test_approved_fixture_run_is_byte_identical_complete_and_descriptive() -> No
     assert payload["power"]["descriptive_regardless_of_p_values"] is True
     assert payload["power"]["candidate_episode_upper_bound_met"] is True
     assert payload["power"]["evaluable_candidate_episode_count"] == 1
-    assert payload["verification_debt"] == ["VD-001", "VD-002", "VD-004"]
+    assert payload["verification_debt"] == ["VD-002", "VD-004"]

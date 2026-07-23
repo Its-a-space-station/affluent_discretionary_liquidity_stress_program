@@ -50,7 +50,10 @@ CONFIDENCE_LABELS = (
     "Stale",
 )
 DEBT_DETAILS = {
-    "VD-001": "A fully independent second implementation has not reproduced the sequence.",
+    "VD-001": (
+        "The source validation artifact predates the owner-accepted independent "
+        "reconstruction; see the current debt register."
+    ),
     "VD-002": "Historical UMich values rely on the declared unrevised-final assumption.",
     "VD-004": "Only four candidate episodes are available; inference remains descriptive.",
 }

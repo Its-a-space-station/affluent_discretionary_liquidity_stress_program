@@ -6,7 +6,7 @@ discharge criteria are met and reviewed by a human.
 
 ## VD-001 — Two-independent-implementer reconstruction
 
-- **Status:** Open
+- **Status:** Closed 2026-07-22 — owner-accepted exact independent match
 - **Opened:** 2026-07-21
 - **Scope:** Composite Spec v1.2 §12 acceptance criterion for the frozen
   2013-present sequence and bands.
@@ -18,25 +18,31 @@ discharge criteria are met and reviewed by a human.
   dwell, PIT-boundary, and staleness defects each produce `Conflicting`.
   Phase 3A adds a blind protocol, neutral Tier-A output contract, immutable
   evidence manifest, pre-disclosure candidate seal, and value-free exact
-  comparator. The ignored 2013-05 through 2026-03 packet verifies at manifest
-  SHA-256 `ed8ebc3ca3c7da9474708b64ac85a78d7fa65e872479f9e9f1a53ec48a4f531b`.
-- **Gap:** The maker and checker are separate code paths but were developed in
-  the same repository during one implementation effort. This does not satisfy
-  §12's requirement for two independent implementers. Preparing the packet and
-  comparator is coordinator work, not a second implementation. No independent
-  candidate has been received or sealed. The live frozen store remains
-  intentionally empty under the owner-approved cold start.
-- **Consequence:** A checker `Verified` result establishes deterministic local
-  source-to-sequence agreement under `adls.checker.v1`; it must not be described
-  as satisfying the full §12 acceptance criterion or as authorizing external
-  publication.
-- **Discharge:** A second implementer, working from the approved spec and raw
-  source artifacts rather than this implementation, reconstructs the full
-  2013-present frozen-equivalent Tier-A sequence and bands. The candidate is
-  sealed before reference disclosure, then exactly matches the neutral
-  canonical projection or every difference is adjudicated and regression-tested.
-  The owner separately confirms implementer independence before closing the
-  debt; no tool changes the status automatically.
+  comparator. The first sealed blind run exposed 1,100 value-free differences;
+  a packet-only post-seal correction reduced those to 19 and proved the only
+  residuals were unpinned intermediate percentile arithmetic and stale-flag
+  tokens. Owner-approved errata items 11-14 added exact language-neutral
+  arithmetic, canonical tokens, ragged-edge selection, and holiday-roll order.
+  The replacement packet verifies at manifest SHA-256
+  `eed37d40c76d2f561835db490cd0e83c4a026f2dc196734816f21fcb05e9a048`.
+  Fresh context-free implementation `codex-independent-cleanroom-20260722-v2-a`
+  attested to packet-only local work with no ADLS, reference, prior-attempt, or
+  comparison access; passed 13 independent tests; was sealed before disclosure;
+  and exactly matched all 155 records of the checker-Verified projection at
+  SHA-256 `21f061228f65582f4527fcb95bea967ae257e9578636c73334f409651dfd4694`.
+- **Gap:** None for VD-001. The owner reviewed the fresh implementation's
+  packet-only/no-reference/no-prior-attempt attestation, confirmed that the
+  process satisfies §12 implementer independence, and confirmed that local
+  handling of the internal-use packet evidence was authorized. The live frozen
+  store remains intentionally empty under the separate owner-approved cold
+  start.
+- **Consequence:** The accepted exact reconstruction discharges the §12
+  two-independent-implementer criterion. It does not authorize external
+  publication, scheduling, live-history seeding, or cross-system feeds.
+- **Discharge:** Completed 2026-07-22 through regression-backed discrepancy
+  adjudication, fresh context-free reconstruction, pre-disclosure seal, exact
+  155-record match, and explicit owner confirmation of independence and the
+  evidence-transfer record. No tool changed the status automatically.
 
 ## VD-002 — Historical UMich final-release reconstruction
 

@@ -5,11 +5,11 @@ from __future__ import annotations
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass
+from decimal import ROUND_HALF_EVEN, Decimal
 from typing import Literal
 
-from adls.engine.serialize import canonicalize_float
-
 BandName = Literal["Normal", "Watch", "Elevated", "High"]
+SIX_PLACES = Decimal("0.000001")
 
 
 @dataclass(frozen=True)
@@ -31,23 +31,34 @@ class BandDecision:
     candidate_count: int
 
 
-def linear_percentile(values: Sequence[float], percentile: float) -> float:
-    """Empirical percentile using linear interpolation between adjacent ranks."""
+def _exact_linear_percentile(values: Sequence[float], percentile: Decimal) -> Decimal:
+    """Type-7 percentile over exact persisted decimal tokens."""
     if not values:
         raise ValueError("percentile requires at least one value")
-    if not 0.0 <= percentile <= 1.0:
+    if not Decimal(0) <= percentile <= Decimal(1):
         raise ValueError("percentile must be between 0 and 1")
     if any(not math.isfinite(value) for value in values):
         raise ValueError("percentile values must be finite")
 
-    ordered = sorted(values)
-    position = (len(ordered) - 1) * percentile
-    lower_index = math.floor(position)
-    upper_index = math.ceil(position)
-    if lower_index == upper_index:
+    ordered = sorted(Decimal(str(value)) for value in values)
+    position = Decimal(len(ordered) - 1) * percentile
+    lower_index = int(position)
+    if lower_index == len(ordered) - 1:
         return ordered[lower_index]
-    weight = position - lower_index
-    return ordered[lower_index] + (ordered[upper_index] - ordered[lower_index]) * weight
+    weight = position - Decimal(lower_index)
+    return ordered[lower_index] + (ordered[lower_index + 1] - ordered[lower_index]) * weight
+
+
+def linear_percentile(values: Sequence[float], percentile: float) -> float:
+    """Empirical type-7 percentile with exact decimal intermediates."""
+    return float(_exact_linear_percentile(values, Decimal(str(percentile))))
+
+
+def _published_threshold(value: Decimal) -> float:
+    rounded = value.quantize(SIX_PLACES, rounding=ROUND_HALF_EVEN)
+    if rounded == 0:
+        rounded = abs(rounded)
+    return float(format(rounded, "f"))
 
 
 def classify_band(value: float, thresholds: BandThresholds) -> BandName:
@@ -65,9 +76,9 @@ def classify_band(value: float, thresholds: BandThresholds) -> BandName:
 
 def _thresholds(values: Sequence[float]) -> BandThresholds:
     return BandThresholds(
-        p70=canonicalize_float(linear_percentile(values, 0.70)),
-        p85=canonicalize_float(linear_percentile(values, 0.85)),
-        p95=canonicalize_float(linear_percentile(values, 0.95)),
+        p70=_published_threshold(_exact_linear_percentile(values, Decimal(70) / Decimal(100))),
+        p85=_published_threshold(_exact_linear_percentile(values, Decimal(85) / Decimal(100))),
+        p95=_published_threshold(_exact_linear_percentile(values, Decimal(95) / Decimal(100))),
     )
 
 
